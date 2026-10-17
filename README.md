@@ -5,8 +5,12 @@ Nobody needs to read or count: the bigger dog wins.
 
 - 36 cards, values 1–6 (6 of each). Each card shows one dog drawn bigger as the value grows,
   plus dice-style pips in two corners.
-- 6 original dog designs on the cards, plus **8 caricatured breeds** to choose as "my dog",
-  all drawn in code (Compose Canvas). No image, icon or audio files.
+- **8 caricatured breeds** to choose as "my dog" (6 of them also star on the 1–6 cards), all
+  drawn in code (Compose Canvas). No image, icon or audio files.
+- **Manga art style** (original, inspired by shōnen action anime; no characters, names or logos
+  from any franchise): bold ink outlines, cel shading, spiky flame-like fur, big shiny anime eyes
+  with determined brows, grins with a little fang, hatched blush, power auras, speed lines,
+  halftone screentone and comic-impact "WOOF!" lettering.
 - Sounds are synthesized at runtime (original, no third-party audio). There are three sound styles to choose from: little pup, big dog and silly cartoon.
 - No INTERNET permission, no ads, no analytics, no purchases, no data collection.
 

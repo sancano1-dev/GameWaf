@@ -40,6 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -82,7 +83,8 @@ fun DrawScope.drawBone(c: Offset, length: Float, color: Color) {
 }
 
 /** Bone-shaped plate filling [rect] (used behind the title). */
-fun DrawScope.drawBonePlate(rect: Rect, color: Color) {
+fun DrawScope.drawBonePlate(rect: Rect, color: Color, outline: Float = 0f) {
+    if (outline > 0f) drawBonePlate(rect.inflate(outline), Ink)
     val t = rect.height * 0.62f
     val r = rect.height * 0.3f
     drawRoundRect(color, topLeft = Offset(rect.left + r, rect.center.y - t / 2), size = Size(rect.width - 2 * r, t), cornerRadius = CornerRadius(t / 2))
@@ -113,14 +115,7 @@ fun DogPicker(selected: Breed, strings: Strings, onSelect: (Breed) -> Unit, onDo
         Column(Modifier.fillMaxSize().padding(horizontal = 16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Row(Modifier.fillMaxWidth().height(header), verticalAlignment = Alignment.CenterVertically) {
                 BigIconButton(onDone, Color(0xFF3FB560), "done") { iconCheck(Color.White) }
-                Text(
-                    strings.chooseDog,
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Black,
-                    color = Cocoa,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.weight(1f),
-                )
+                MangaTitle(strings.chooseDog, 28.sp, Color(0xFFFF8A3D), Modifier.weight(1f))
                 Box(Modifier.size(MinTouch))
             }
             Column(verticalArrangement = Arrangement.Center, modifier = Modifier.fillMaxSize()) {
@@ -146,7 +141,7 @@ private fun DogTile(breed: Breed, selected: Boolean, name: String, wag: Float, m
             .shadow(if (selected) 12.dp else 4.dp, shape)
             .clip(shape)
             .background(breed.card)
-            .border(if (selected) 7.dp else 4.dp, if (selected) Color(0xFFFFC93C) else breed.collar.copy(alpha = 0.6f), shape)
+            .border(if (selected) 7.dp else 3.dp, if (selected) Color(0xFFFFC93C) else Ink, shape)
             .clickable(role = Role.RadioButton, onClick = onClick)
             .semantics { contentDescription = name },
     ) {
@@ -154,12 +149,28 @@ private fun DogTile(breed: Breed, selected: Boolean, name: String, wag: Float, m
             Canvas(Modifier.fillMaxWidth().weight(1f)) {
                 val s = minOf(size.width, size.height) * 0.95f
                 drawOval(Color.Black.copy(alpha = 0.08f), topLeft = Offset(size.width / 2 - s * 0.35f, size.height - s * 0.07f), size = Size(s * 0.7f, s * 0.08f))
-                drawBreed(breed, size.width / 2, size.height * 0.98f, s, wag = if (selected) wag * 25f else 0f, happy = selected)
+                if (selected) {
+                    drawSpeedLines(Offset(size.width / 2, size.height * 0.55f), s * 0.42f, s * 1.2f, breed.collar.copy(alpha = 0.45f), count = 30, seed = breed.ordinal)
+                }
+                drawBreed(breed, size.width / 2, size.height * 0.98f, s, wag = if (selected) wag * 25f else 0f, happy = selected, aura = selected, phase = wag)
                 if (selected) {
                     drawCrown(Rect(size.width * 0.06f, size.height * 0.02f, size.width * 0.06f + s * 0.24f, size.height * 0.02f + s * 0.16f), Color(0xFFFFD43B))
                 }
             }
             Text(name, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Cocoa, maxLines = 1)
         }
+    }
+}
+
+/** Comic-book lettering: bold text with a thick ink outline. */
+@Composable
+fun MangaTitle(text: String, fontSize: androidx.compose.ui.unit.TextUnit, fill: Color, modifier: Modifier = Modifier) {
+    Box(modifier, contentAlignment = Alignment.Center) {
+        Text(
+            text, fontSize = fontSize, fontWeight = FontWeight.Black, color = Ink, textAlign = TextAlign.Center,
+            style = androidx.compose.ui.text.TextStyle(drawStyle = androidx.compose.ui.graphics.drawscope.Stroke(width = fontSize.value * 0.32f, join = androidx.compose.ui.graphics.StrokeJoin.Round)),
+            modifier = Modifier.clearAndSetSemantics { }, // outline layer only; the fill text carries the label
+        )
+        Text(text, fontSize = fontSize, fontWeight = FontWeight.Black, color = fill, textAlign = TextAlign.Center)
     }
 }

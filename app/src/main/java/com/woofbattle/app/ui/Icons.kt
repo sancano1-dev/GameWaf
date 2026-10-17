@@ -110,6 +110,7 @@ fun DrawScope.iconClose(color: Color) {
 
 /** A smiling child's face in [color] (used for "human" seats and the home tiles). */
 fun DrawScope.drawKidFace(center: Offset, radius: Float, color: Color) {
+    drawCircle(Ink, radius * 1.06f, center)
     drawCircle(Color(0xFFFFD9B5), radius, center)
     drawArc(color, 180f, 180f, true, topLeft = Offset(center.x - radius * 1.02f, center.y - radius * 1.05f), size = Size(radius * 2.04f, radius * 1.3f))
     drawCircle(Color(0xFF2B1B10), radius * 0.1f, Offset(center.x - radius * 0.35f, center.y + radius * 0.05f))

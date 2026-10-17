@@ -8,6 +8,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,6 +39,7 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.inset
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -84,9 +86,9 @@ fun HomeScreen(
                     Canvas(Modifier.fillMaxSize()) {
                         val s = size.minDimension
                         drawCircle(fav.card, s * 0.47f)
-                        drawCircle(fav.collar.copy(alpha = 0.5f), s * 0.47f, style = Stroke(s * 0.035f))
+                        drawCircle(Ink, s * 0.47f, style = Stroke(s * 0.025f))
                         drawOval(Color.Black.copy(alpha = 0.1f), topLeft = Offset(s * 0.22f, s * 0.83f), size = Size(s * 0.56f, s * 0.07f))
-                        drawBreed(fav, s / 2, s * 0.87f, s * 0.72f, wag = (t - 0.5f) * 50f)
+                        drawBreed(fav, s / 2, s * 0.87f, s * 0.72f, wag = (t - 0.5f) * 50f, aura = true, phase = t * 6f)
                         // "change" badge
                         val bc = Offset(s * 0.84f, s * 0.84f)
                         drawCircle(Color.White, s * 0.13f, bc)
@@ -97,9 +99,9 @@ fun HomeScreen(
                 Box(Modifier.size(width = 280.dp, height = 70.dp), contentAlignment = Alignment.Center) {
                     Canvas(Modifier.fillMaxSize()) {
                         drawBonePlate(Rect(0f, size.height * 0.06f, size.width, size.height), Color.Black.copy(alpha = 0.08f))
-                        drawBonePlate(Rect(0f, 0f, size.width, size.height * 0.94f), Color.White)
+                        drawBonePlate(Rect(6f, 6f, size.width - 6f, size.height * 0.94f - 6f), Color.White, outline = 3.dp.toPx())
                     }
-                    Text("Woof Battle", fontSize = 30.sp, fontWeight = FontWeight.Black, color = Cocoa, modifier = Modifier.padding(bottom = 4.dp))
+                    MangaTitle("Woof Battle", 30.sp, Color(0xFFFF8A3D), Modifier.padding(bottom = 4.dp).graphicsLayer { rotationZ = -3f })
                 }
             }
         }
@@ -181,6 +183,7 @@ private fun PickTile(color: Color, width: Dp, height: Dp, label: String?, onClic
             .shadow(8.dp, shape)
             .clip(shape)
             .background(color)
+            .border(3.dp, Ink, shape)
             .clickable(role = Role.Button, onClick = onClick)
             .semantics { contentDescription = description },
     ) {

@@ -65,6 +65,10 @@ fun VictoryOverlay(ui: GameUi, onReplay: () -> Unit, onHome: () -> Unit) {
     ) {
         val unit = min(maxWidth, maxHeight)
         Canvas(Modifier.fillMaxSize()) {
+            // manga victory rays slowly turning behind everything
+            rotate(time * 8f, Offset(size.width / 2, size.height * 0.45f)) {
+                drawSpeedLines(Offset(size.width / 2, size.height * 0.45f), size.minDimension * 0.18f, size.maxDimension, Color(0xFFFFD43B).copy(alpha = 0.28f), count = 40, seed = 11)
+            }
             confetti.forEach { p ->
                 val y = (((p.y0 + time * p.speed) % 1.15f) - 0.08f) * size.height
                 val x = p.x * size.width + sin(time * p.sway + p.phase) * 24.dp.toPx()
@@ -101,6 +105,8 @@ fun VictoryOverlay(ui: GameUi, onReplay: () -> Unit, onHome: () -> Unit) {
                     s = size.height * 0.9f,
                     wag = sin(time * 14f) * 28f,
                     happy = true,
+                    aura = true,
+                    phase = time,
                 )
             }
             Row(horizontalArrangement = Arrangement.spacedBy(unit * 0.08f)) {

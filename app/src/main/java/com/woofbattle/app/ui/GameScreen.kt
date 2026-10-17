@@ -54,6 +54,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.inset
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -206,7 +207,7 @@ fun GameScreen(
         )
 
         if (ui.dealing) ShuffleIntro(cardW, cardH, Modifier.align(Alignment.Center))
-        WoofBanner(ui.woof, strings.woof, Modifier.align(Alignment.Center), min(maxWidth, maxHeight) * 0.8f)
+        WoofBanner(ui.woof, strings.woof, Modifier.fillMaxSize(), min(maxWidth, maxHeight) * 0.85f)
 
         if (ui.showVictory) {
             VictoryOverlay(ui = ui, onReplay = onReplay, onHome = onHome)
@@ -311,7 +312,7 @@ private fun SeatBar(ui: GameUi, seat: Int, color: Color, barH: Dp, onFlip: (Int)
             .fillMaxSize()
             .scale(winBounce)
             .background(color.copy(alpha = if (waiting) 0.9f else 0.55f), shape)
-            .border(if (winner || battling) 6.dp else 0.dp, if (winner) Gold else Color.White, shape)
+            .border(if (winner || battling) 6.dp else 3.dp, if (winner) Gold else if (battling) Color.White else Ink, shape)
             .clickable(
                 enabled = human && !eliminated,
                 interactionSource = remember { MutableInteractionSource() },
@@ -392,41 +393,52 @@ private fun DrawScope.drawIntoCardBack(w: Float, h: Float) {
     drawContext.size = old
 }
 
+/** Manga impact panel for a tie: full-screen speed lines, a jagged burst and inked "WOOF!" lettering. */
 @Composable
 private fun WoofBanner(visible: Boolean, text: String, modifier: Modifier, maxSize: Dp) {
     AnimatedVisibility(
         visible = visible,
         modifier = modifier,
-        enter = scaleIn(spring(dampingRatio = 0.4f, stiffness = 300f)) + fadeIn(),
-        exit = scaleOut() + fadeOut(),
+        enter = scaleIn(spring(dampingRatio = 0.4f, stiffness = 300f), initialScale = 0.3f) + fadeIn(),
+        exit = scaleOut(targetScale = 1.3f) + fadeOut(),
     ) {
-        val spin = rememberInfiniteTransition(label = "spin")
-        val angle by spin.animateFloat(0f, 360f, infiniteRepeatable(tween(6000)), label = "a")
-        Box(Modifier.size(min(maxSize, 360.dp)), contentAlignment = Alignment.Center) {
-            Canvas(Modifier.fillMaxSize().graphicsLayer { rotationZ = angle }) {
+        val pulse = rememberInfiniteTransition(label = "impact")
+        val beat by pulse.animateFloat(0.96f, 1.04f, infiniteRepeatable(tween(140), RepeatMode.Reverse), label = "b")
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Canvas(Modifier.fillMaxSize()) {
                 val c = Offset(size.width / 2, size.height / 2)
-                val outer = size.minDimension / 2
-                val star = Path()
-                val points = 14
-                for (i in 0 until points * 2) {
-                    val r = if (i % 2 == 0) outer else outer * 0.72f
-                    val a = Math.PI * i / points
-                    val pt = Offset(c.x + (r * cos(a)).toFloat(), c.y + (r * sin(a)).toFloat())
-                    if (i == 0) star.moveTo(pt.x, pt.y) else star.lineTo(pt.x, pt.y)
-                }
-                star.close()
-                drawPath(star, Color(0xFFFFD43B))
-                drawPath(star, Color(0xFFFF8A3D), style = Stroke(outer * 0.05f))
+                drawSpeedLines(c, size.minDimension * 0.32f, size.maxDimension, Ink.copy(alpha = 0.55f), count = 70, seed = 3)
             }
-            val fontSize = (min(maxSize, 360.dp).value * 0.2f).sp
-            Text(text, fontSize = fontSize, fontWeight = FontWeight.Black, color = Color(0xFFE63946))
-            Text(
-                text,
-                fontSize = fontSize,
-                fontWeight = FontWeight.Black,
-                color = Color.White,
-                style = TextStyle(drawStyle = androidx.compose.ui.graphics.drawscope.Stroke(width = 6f)),
-            )
+            val burst = min(maxSize, 380.dp)
+            Box(Modifier.size(burst).scale(beat), contentAlignment = Alignment.Center) {
+                Canvas(Modifier.fillMaxSize()) {
+                    val c = Offset(size.width / 2, size.height / 2)
+                    val outer = size.minDimension / 2
+                    fun jagged(scale: Float, seed: Int): Path {
+                        val r = kotlin.random.Random(seed)
+                        val p = Path()
+                        val points = 16
+                        for (i in 0 until points * 2) {
+                            val rr = outer * scale * (if (i % 2 == 0) 0.88f + r.nextFloat() * 0.12f else 0.6f + r.nextFloat() * 0.08f)
+                            val a = Math.PI * i / points
+                            val pt = Offset(c.x + (rr * cos(a)).toFloat(), c.y + (rr * sin(a)).toFloat())
+                            if (i == 0) p.moveTo(pt.x, pt.y) else p.lineTo(pt.x, pt.y)
+                        }
+                        p.close()
+                        return p
+                    }
+                    val big = jagged(1f, 5)
+                    drawPath(big, Color(0xFFFFD43B))
+                    drawPath(jagged(0.72f, 9), Color(0xFFFF8A3D))
+                    drawPath(big, Ink, style = Stroke(outer * 0.045f, join = StrokeJoin.Miter))
+                }
+                val fontSize = (burst.value * 0.21f).sp
+                Box(Modifier.graphicsLayer { rotationZ = -8f }, contentAlignment = Alignment.Center) {
+                    Text(text, fontSize = fontSize, fontWeight = FontWeight.Black, color = Ink, style = TextStyle(drawStyle = Stroke(width = 22f, join = StrokeJoin.Round)))
+                    Text(text, fontSize = fontSize, fontWeight = FontWeight.Black, color = Color(0xFFE63946))
+                    Text(text, fontSize = fontSize, fontWeight = FontWeight.Black, color = Color.White.copy(alpha = 0.9f), style = TextStyle(drawStyle = Stroke(width = 3f)))
+                }
+            }
         }
     }
 }

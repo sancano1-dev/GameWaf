@@ -183,10 +183,10 @@ private fun DrawScope.drawSoundThemeIcon(theme: SoundTheme) {
     val w = size.width
     val h = size.height
     when (theme) {
-        SoundTheme.PUPPY -> drawDog(DogStyles[0], w * 0.42f, h * 0.98f, h * 0.55f)
-        SoundTheme.BIG_DOG -> drawDog(DogStyles[5], w * 0.42f, h * 0.98f, h * 0.92f)
+        SoundTheme.PUPPY -> drawBreed(Breed.PUG, w * 0.42f, h * 0.98f, h * 0.55f)
+        SoundTheme.BIG_DOG -> drawBreed(Breed.GOLDEN, w * 0.42f, h * 0.98f, h * 0.92f)
         SoundTheme.SILLY -> rotate(-12f, Offset(w * 0.42f, h * 0.7f)) {
-            drawDog(DogStyles[3], w * 0.42f, h * 0.9f, h * 0.8f, wag = 25f, happy = true)
+            drawBreed(Breed.POODLE, w * 0.42f, h * 0.9f, h * 0.8f, wag = 25f, happy = true)
         }
     }
     // music note
