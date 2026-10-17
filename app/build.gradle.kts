@@ -35,8 +35,10 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
+            // No R8 shrinking/obfuscation: the release build runs exactly the code the tests cover
+            // (the R8-optimised 1.2 build could not be verified on a device). The app is small anyway.
+            isMinifyEnabled = false
+            isShrinkResources = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
             signingConfigs.findByName("upload")?.let { signingConfig = it }
         }

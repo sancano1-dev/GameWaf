@@ -78,7 +78,10 @@ The GitHub repository is private, so its files aren't public. Options:
 3. Upload the new `app-release.aab` to a new release.
 
 ## Notes
-- The APK from GitHub Releases v1.2 is signed with the upload key. It can't be installed over the
-  earlier v1.0/v1.1 debug builds (different signature): uninstall those first.
-- Builds from Google Play are signed by Google's app signing key, so they also replace neither of
-  the above; testers should uninstall sideloaded versions before installing from Play.
+- **Two signatures, on purpose.** The APK on GitHub Releases is signed with the same key as the
+  earlier v1.0/v1.1 APKs, so it installs as an update over them. The `app-release.aab` for Google
+  Play is signed with the upload key, and Google re-signs it for Play users. A copy installed from
+  GitHub and one installed from Play can't replace each other: uninstall one before installing the
+  other (otherwise Android says "App not installed").
+- Code shrinking (R8) is off for release builds, so the store build runs exactly the code covered
+  by the tests. If you turn it on later for a smaller download, test that build on a real phone.
