@@ -1,12 +1,3 @@
-# Play Store-vermelding — Nederlands (nl-NL)
-
-## App-naam (max. 30)
-Woof Battle: honden kaartspel
-
-## Korte beschrijving (max. 80)
-De grootste hond wint! Offline kaartspel voor kinderen van 3-6, zonder reclame.
-
-## Volledige beschrijving (max. 4000)
 Woof Battle is het klassieke kaartspel "oorlogje" voor de allerkleinsten die nog niet kunnen lezen of tellen: de grootste hond wint!
 
 🐶 ZO SPEEL JE

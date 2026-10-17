@@ -40,7 +40,7 @@ class SessionTest {
     fun `every language has every label`() {
         Lang.entries.forEach { lang ->
             val s = Strings.of(lang)
-            listOf(s.woof, s.players, s.gameLength, s.sound, s.soundStyle, s.language, s.parentArea, s.chooseDog).forEach { assert(it.isNotBlank()) }
+            listOf(s.woof, s.players, s.gameLength, s.sound, s.soundStyle, s.language, s.parentArea, s.chooseDog, s.privacyTitle, s.privacyText).forEach { assert(it.isNotBlank()) }
             assertEquals(com.woofbattle.app.ui.Breed.entries.size, s.breedNames.size)
         }
     }

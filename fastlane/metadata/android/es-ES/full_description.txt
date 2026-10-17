@@ -1,12 +1,3 @@
-# Ficha de Play Store — Español (es-ES)
-
-## Nombre de la aplicación (máx. 30)
-Woof Battle: batalla de perros
-
-## Descripción breve (máx. 80)
-¡Gana el perro más grande! Cartas sin conexión para 3-6 años, sin anuncios.
-
-## Descripción completa (máx. 4000)
 Woof Battle es el clásico juego de cartas de la "batalla" pensado para los más pequeños, que aún no saben leer ni contar: ¡gana el perro más grande!
 
 🐶 CÓMO SE JUEGA

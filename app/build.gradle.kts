@@ -41,6 +41,8 @@ android {
             isShrinkResources = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
             signingConfigs.findByName("upload")?.let { signingConfig = it }
+            // Ship native debug symbols in the App Bundle so Play Console can symbolicate crashes
+            ndk { debugSymbolLevel = "SYMBOL_TABLE" }
         }
     }
 

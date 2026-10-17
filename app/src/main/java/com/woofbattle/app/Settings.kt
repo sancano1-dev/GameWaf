@@ -91,19 +91,29 @@ data class Strings(
     val cards: String,
     val chooseDog: String,
     val breedNames: List<String>,
+    val privacyTitle: String,
+    val privacyText: String,
 ) {
     fun breedName(b: Breed) = breedNames[b.ordinal]
 
     companion object {
         fun of(lang: Lang): Strings = when (lang) {
             Lang.EN -> Strings("WOOF!", "Players in demo", "Game length", "Until one dog has all cards", "Short game", "rounds", "Sound", "Sound style", "Auto-play (demo)", "Language", "Parents", "Hold 3 seconds", "Back to start", "cards", "Choose your dog",
-                listOf("Golden", "Dalmatian", "Beagle", "Pug", "Corgi", "Poodle", "Husky", "Dachshund"))
+                listOf("Golden", "Dalmatian", "Beagle", "Pug", "Corgi", "Poodle", "Husky", "Dachshund"),
+                "Privacy",
+                "Woof Battle collects no personal data. It has no internet access, no ads, no analytics and no in-app purchases. Settings and the current game are stored only on this device and are deleted when the app is uninstalled.")
             Lang.FR -> Strings("OUAF !", "Joueurs en démo", "Durée de la partie", "Jusqu'à ce qu'un chien ait toutes les cartes", "Partie courte", "tours", "Son", "Style de sons", "Jeu automatique (démo)", "Langue", "Parents", "Appuyer 3 secondes", "Retour à l'accueil", "cartes", "Choisis ton chien",
-                listOf("Golden", "Dalmatien", "Beagle", "Carlin", "Corgi", "Caniche", "Husky", "Teckel"))
+                listOf("Golden", "Dalmatien", "Beagle", "Carlin", "Corgi", "Caniche", "Husky", "Teckel"),
+                "Confidentialité",
+                "Woof Battle ne collecte aucune donnée personnelle. Pas d'accès à internet, pas de publicité, pas de statistiques, pas d'achats intégrés. Les réglages et la partie en cours restent uniquement sur cet appareil et sont supprimés quand l'application est désinstallée.")
             Lang.ES -> Strings("¡GUAU!", "Jugadores en demo", "Duración", "Hasta que un perro tenga todas las cartas", "Partida corta", "rondas", "Sonido", "Estilo de sonidos", "Juego automático (demo)", "Idioma", "Padres", "Mantén 3 segundos", "Volver al inicio", "cartas", "Elige tu perro",
-                listOf("Golden", "Dálmata", "Beagle", "Carlino", "Corgi", "Caniche", "Husky", "Salchicha"))
+                listOf("Golden", "Dálmata", "Beagle", "Carlino", "Corgi", "Caniche", "Husky", "Salchicha"),
+                "Privacidad",
+                "Woof Battle no recoge ningún dato personal. No tiene acceso a internet, ni anuncios, ni estadísticas, ni compras. Los ajustes y la partida en curso solo se guardan en este dispositivo y se borran al desinstalar la aplicación.")
             Lang.NL -> Strings("WOEF!", "Spelers in demo", "Speelduur", "Tot één hond alle kaarten heeft", "Kort spel", "rondes", "Geluid", "Geluidsstijl", "Automatisch spelen (demo)", "Taal", "Ouders", "3 seconden vasthouden", "Terug naar start", "kaarten", "Kies je hond",
-                listOf("Golden", "Dalmatiër", "Beagle", "Mopshond", "Corgi", "Poedel", "Husky", "Teckel"))
+                listOf("Golden", "Dalmatiër", "Beagle", "Mopshond", "Corgi", "Poedel", "Husky", "Teckel"),
+                "Privacy",
+                "Woof Battle verzamelt geen persoonsgegevens. Geen internettoegang, geen reclame, geen statistieken en geen aankopen in de app. Instellingen en het huidige spel blijven alleen op dit apparaat en worden verwijderd als de app wordt verwijderd.")
         }
     }
 }

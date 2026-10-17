@@ -1,12 +1,3 @@
-# Fiche Play Store — Français (fr-FR)
-
-## Nom de l'application (30 max)
-Woof Battle : jeu de bataille
-
-## Description courte (80 max)
-Le plus gros chien gagne ! Jeu de cartes hors ligne pour les 3-6 ans, sans pub.
-
-## Description complète (4000 max)
 Woof Battle, c'est le jeu de la bataille pensé pour les tout-petits qui ne savent pas encore lire ni compter : le plus gros chien gagne !
 
 🐶 COMMENT JOUER

@@ -24,6 +24,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
@@ -147,7 +149,22 @@ fun ParentArea(
                     Text(strings.quitGame, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White)
                 }
             }
-            Text("Offline • no ads • no data collected", fontSize = 12.sp, color = Cocoa.copy(alpha = 0.6f))
+            Column(
+                Modifier
+                    .widthIn(max = 720.dp)
+                    .fillMaxWidth()
+                    .background(Color.White.copy(alpha = 0.7f), RoundedCornerShape(20.dp))
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Text(strings.privacyTitle, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Cocoa)
+                Text(strings.privacyText, fontSize = 15.sp, color = Cocoa)
+                val context = LocalContext.current
+                val version = remember {
+                    runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }.getOrNull()
+                }
+                Text("Woof Battle ${version ?: ""}", fontSize = 12.sp, color = Cocoa.copy(alpha = 0.6f))
+            }
         }
     }
 }

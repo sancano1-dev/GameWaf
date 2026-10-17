@@ -1,12 +1,3 @@
-# Store listing — English (en-US)
-
-## App name (max 30)
-Woof Battle: Dog Card Game
-
-## Short description (max 80)
-The bigger dog wins! A cute offline card game for kids 3-6. No reading, no ads.
-
-## Full description (max 4000)
 Woof Battle is the classic "battle" card game made for little ones who can't read or count yet: the bigger dog wins!
 
 🐶 HOW TO PLAY
@@ -34,9 +25,3 @@ Bold ink lines, big shiny eyes, speed lines, power auras, a bark-off on every ti
 • Parent area behind a 3-second hold: game length, sound, three sound styles, auto-play, language
 • English, Français, Español, Nederlands
 • Works on phones and tablets, portrait and landscape
-
-## Category
-Game › Card (alternative: Game › Educational)
-
-## Tags (pick up to 5 in Play Console)
-Card, Casual, Kids, Offline, Animals

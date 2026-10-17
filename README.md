@@ -195,3 +195,9 @@ label is there for parents). The arrow button or Back returns to the menu.
   and saved, but its animation isn't replayed.
 - The release build is minified but unsigned. Add a signing config for distribution.
 - No TalkBack-optimised flow beyond content descriptions on buttons.
+
+## Publishing on Google Play
+
+See [store/PLAY_STORE_GUIDE.md](store/PLAY_STORE_GUIDE.md): readiness checklist, Play Console answers
+(content rating, families, data safety), store texts and graphics in `fastlane/metadata/android/`,
+and the privacy policy page in `docs/privacy-policy.html`.
