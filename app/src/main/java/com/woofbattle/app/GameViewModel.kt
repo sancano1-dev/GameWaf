@@ -22,7 +22,8 @@ import kotlinx.serialization.json.Json
 
 enum class Mode { VS_CPU, TOGETHER, DEMO }
 
-enum class Screen { HOME, GAME }
+/** DOGS = "Choose your dog", shown first on every launch and from the menu. */
+enum class Screen { DOGS, HOME, GAME }
 
 /** What must survive rotation and process death: the mode, which seats are human, the engine state. */
 @Serializable
@@ -64,7 +65,7 @@ data class GameUi(
 }
 
 data class AppUi(
-    val screen: Screen = Screen.HOME,
+    val screen: Screen = Screen.DOGS,
     val settings: Settings = Settings(),
     val game: GameUi? = null,
 )
@@ -143,6 +144,16 @@ class GameViewModel(app: Application, private val handle: SavedStateHandle) : An
         handle.remove<String>(KEY_SESSION)
         handle[KEY_SCREEN] = Screen.HOME.name
         _ui.update { it.copy(screen = Screen.HOME, game = null) }
+    }
+
+    fun openDogPicker() = showScreen(Screen.DOGS)
+
+    /** Green check on Choose your dog: on to the main menu. */
+    fun closeDogPicker() = showScreen(Screen.HOME)
+
+    private fun showScreen(screen: Screen) {
+        handle[KEY_SCREEN] = screen.name
+        _ui.update { it.copy(screen = screen) }
     }
 
     fun updateSettings(transform: (Settings) -> Settings) {
@@ -273,7 +284,12 @@ class GameViewModel(app: Application, private val handle: SavedStateHandle) : An
         val session = handle.get<String>(KEY_SESSION)?.let {
             runCatching { json.decodeFromString(Session.serializer(), it) }.getOrNull()
         }
-        val screen = if (session != null && handle.get<String>(KEY_SCREEN) == Screen.GAME.name) Screen.GAME else Screen.HOME
+        val saved = handle.get<String>(KEY_SCREEN)?.let { runCatching { Screen.valueOf(it) }.getOrNull() }
+        val screen = when {
+            saved == Screen.GAME && session != null -> Screen.GAME
+            saved == Screen.HOME -> Screen.HOME
+            else -> Screen.DOGS // fresh launch: pick your dog first
+        }
         return AppUi(
             screen = screen,
             settings = settings,

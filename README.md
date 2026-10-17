@@ -34,7 +34,7 @@ Then:
 
 ```bash
 ./gradlew assembleDebug     # APK: app/build/outputs/apk/debug/app-debug.apk
-./gradlew test              # engine + app unit tests
+./gradlew test              # engine rules + app unit tests + end-to-end UI flows (Robolectric)
 ```
 
 On Windows use `gradlew.bat` (or `./gradlew` from Git Bash).
@@ -106,9 +106,14 @@ GameOver). The ViewModel replays those events as animations. The RNG state is st
 
 ## Modes and UX
 
+**Launch flow:** every time the app starts it opens on **Choose your dog**, which shows 8 big
+picture tiles. The child taps a dog (it barks, smiles and gets a crown), then the green check
+leads to the main menu. Rotating the screen or returning from the background does not show the
+picker again; only a fresh start does.
+
 **Dog-park menu:** the home screen has a warm background with paw prints and bones, the title on
-a bone-shaped plate, and stitched tiles. The child's own dog sits at the top: tap it to open
-**Choose your dog**, which shows 8 big picture tiles. Each breed is a caricature in its own colour:
+a bone-shaped plate, and stitched tiles. The child's own dog sits at the top: tap it to go back
+to **Choose your dog**. Each breed is a caricature in its own colour:
 
 | Breed | Colour / look |
 |---|---|
@@ -138,7 +143,8 @@ label is there for parents). The arrow button or Back returns to the menu.
 - The pile is drawn as a stack whose height grows with card count, plus a small number for parents.
 - Tie: bark sound, screen shake, spinning "WOOF!" burst (OUAF ! / ¡GUAU! / WOEF! by language).
 - Victory: confetti, winner badge with crown, tail-wagging dog, replay and home buttons.
-- **Parent area:** hold the gear button for 3 seconds (a ring fills up). It sets players, game
+- **Parent area:** hold the gear button for 3 seconds (a ring fills up). It sets the number of
+  players in the demo (the other modes choose it on their picker), game
   length, sound on/off, **sound style** (tap a style to hear its bark), auto-play and
   **language**: English, Français, Español, Nederlands, and lets you quit a game.
 - Every child-facing touch target is at least 96dp. Everything is tap-only, with no swipe gestures.

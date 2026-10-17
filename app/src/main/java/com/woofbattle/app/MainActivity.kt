@@ -17,6 +17,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.woofbattle.app.ui.DogPicker
 import com.woofbattle.app.ui.GameScreen
 import com.woofbattle.app.ui.HomeScreen
 import com.woofbattle.app.ui.ParentArea
@@ -41,7 +42,14 @@ class MainActivity : ComponentActivity() {
 
                 Box(Modifier.fillMaxSize()) {
                     val game = app.game
-                    if (app.screen == Screen.GAME && game != null) {
+                    if (app.screen == Screen.DOGS) {
+                        DogPicker(
+                            selected = app.settings.favoriteDog,
+                            strings = strings,
+                            onSelect = viewModel::chooseFavoriteDog,
+                            onDone = viewModel::closeDogPicker,
+                        )
+                    } else if (app.screen == Screen.GAME && game != null) {
                         GameScreen(
                             ui = game,
                             settings = app.settings,
@@ -59,7 +67,7 @@ class MainActivity : ComponentActivity() {
                             onStart = viewModel::startGame,
                             onToggleSound = toggleSound,
                             onOpenParent = { parentOpen = true },
-                            onChooseDog = viewModel::chooseFavoriteDog,
+                            onOpenDogPicker = viewModel::openDogPicker,
                         )
                     }
                     if (parentOpen) {

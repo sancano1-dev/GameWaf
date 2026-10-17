@@ -89,13 +89,13 @@ class ScreenshotTest {
     @Test
     @Config(qualifiers = "w411dp-h891dp-xxhdpi")
     fun dog_picker_portrait() = shoot("dog_picker_portrait") {
-        HomeScreen(settings.copy(favoriteDog = Breed.CORGI), strings, { _, _ -> }, {}, {}, initialChoosingDog = true)
+        com.woofbattle.app.ui.DogPicker(Breed.CORGI, strings, {}, {})
     }
 
     @Test
     @Config(qualifiers = "w891dp-h411dp-xxhdpi")
     fun dog_picker_landscape() = shoot("dog_picker_landscape") {
-        HomeScreen(settings.copy(favoriteDog = Breed.POODLE), Strings.of(Lang.FR), { _, _ -> }, {}, {}, initialChoosingDog = true)
+        com.woofbattle.app.ui.DogPicker(Breed.POODLE, Strings.of(Lang.FR), {}, {})
     }
 
     @Test

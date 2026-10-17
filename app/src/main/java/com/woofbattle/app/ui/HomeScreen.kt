@@ -58,21 +58,14 @@ fun HomeScreen(
     onStart: (mode: Mode, players: Int) -> Unit,
     onToggleSound: () -> Unit,
     onOpenParent: () -> Unit,
-    onChooseDog: (Breed) -> Unit = {},
+    onOpenDogPicker: () -> Unit = {},
     initialPicking: Mode? = null,
-    initialChoosingDog: Boolean = false,
 ) {
     val wag = rememberInfiniteTransition(label = "wag")
     val t by wag.animateFloat(0f, 1f, infiniteRepeatable(tween(900), RepeatMode.Reverse), label = "t")
     /** Mode whose player-count picker is open, or null for the main menu. */
     var picking by rememberSaveable { mutableStateOf(initialPicking) }
-    var choosingDog by rememberSaveable { mutableStateOf(initialChoosingDog) }
     BackHandler(enabled = picking != null) { picking = null }
-
-    if (choosingDog) {
-        DogPicker(settings.favoriteDog, strings, onSelect = onChooseDog, onDone = { choosingDog = false })
-        return
-    }
 
     val fav = settings.favoriteDog
     BoxWithConstraints(Modifier.fillMaxSize()) {
@@ -85,7 +78,7 @@ fun HomeScreen(
                 Box(
                     Modifier
                         .size(max(dogSize, MinTouch))
-                        .clickable(role = Role.Button) { choosingDog = true }
+                        .clickable(role = Role.Button, onClick = onOpenDogPicker)
                         .semantics { contentDescription = strings.chooseDog },
                 ) {
                     Canvas(Modifier.fillMaxSize()) {
