@@ -9,6 +9,7 @@ import com.woofbattle.engine.Card
 import com.woofbattle.engine.GameEngine
 import com.woofbattle.engine.GameState
 import com.woofbattle.engine.RoundEvent
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -57,6 +58,8 @@ data class GameUi(
     val returning: Boolean = false,
     /** Start-of-game shuffle and deal animation; taps are ignored meanwhile. */
     val dealing: Boolean = false,
+    /** Round decided: cards stay on the table until someone taps the screen to go on. */
+    val awaitingContinue: Boolean = false,
 ) {
     val game: GameState get() = session.game
     val showVictory: Boolean get() = game.isFinished && !animating
@@ -76,6 +79,8 @@ class GameViewModel(app: Application, private val handle: SavedStateHandle) : An
     @Volatile private var sounds: SoundPlayer? = null
     private var roundJob: Job? = null
     private var autoJob: Job? = null
+    /** Completed by [onContinueTap] while a finished round waits on the table. */
+    private var continueSignal: CompletableDeferred<Unit>? = null
 
     private val _ui = MutableStateFlow(restore())
     val ui: StateFlow<AppUi> = _ui.asStateFlow()
@@ -161,6 +166,7 @@ class GameViewModel(app: Application, private val handle: SavedStateHandle) : An
         settingsRepo.save(next)
         sounds?.enabled = next.soundOn
         sounds?.theme = next.soundTheme
+        if (next.autoPlay) continueSignal?.complete(Unit) // auto-play also skips the wait
         _ui.update { it.copy(settings = next) }
         scheduleAutoFlip()
     }
@@ -182,6 +188,14 @@ class GameViewModel(app: Application, private val handle: SavedStateHandle) : An
         val ready = g.ready + seat
         _ui.update { it.copy(game = g.copy(ready = ready)) }
         if (activeHumans(g).all { it in ready }) startRound()
+    }
+
+    /** Tap anywhere after a round: collect the cards and get ready for the next round. */
+    fun onContinueTap() {
+        val signal = continueSignal ?: return
+        if (_ui.value.game?.awaitingContinue != true) return
+        play(Sfx.TAP)
+        signal.complete(Unit)
     }
 
     private fun activeHumans(g: GameUi) = g.session.humans.filter { !g.game.players[it].isEliminated }
@@ -211,6 +225,21 @@ class GameViewModel(app: Application, private val handle: SavedStateHandle) : An
         roundJob = viewModelScope.launch {
             val counts = g.pileCounts.toMutableList()
             fun set(transform: GameUi.() -> GameUi) = _ui.update { app -> app.copy(game = app.game?.transform()) }
+
+            // Children keep the result on screen until they tap; demos and CPU-only games go on alone.
+            val waitForTap = !_ui.value.settings.autoPlay && activeHumans(g).isNotEmpty()
+            suspend fun holdTable() {
+                if (waitForTap) {
+                    val signal = CompletableDeferred<Unit>()
+                    continueSignal = signal
+                    set { copy(awaitingContinue = true) }
+                    signal.await()
+                    continueSignal = null
+                    set { copy(awaitingContinue = false) }
+                } else {
+                    delay(AUTO_CONTINUE_MS)
+                }
+            }
 
             set { copy(animating = true, ready = emptySet()) }
             for (event in result.events) {
@@ -245,12 +274,15 @@ class GameViewModel(app: Application, private val handle: SavedStateHandle) : An
                         play(Sfx.WIN)
                         set { copy(trickWinner = event.winner, battlers = emptySet()) }
                         delay(600)
+                        holdTable()
                         set { copy(collectTo = event.winner) }
                         delay(750)
                         set { copy(table = emptyList(), collectTo = null, pileCounts = result.state.players.map { it.cardCount }) }
                     }
                     is RoundEvent.Returned -> {
-                        set { copy(returning = true, battlers = emptySet()) }
+                        set { copy(battlers = emptySet()) }
+                        holdTable()
+                        set { copy(returning = true) }
                         delay(750)
                         set { copy(table = emptyList(), returning = false, pileCounts = result.state.players.map { it.cardCount }) }
                     }
@@ -265,7 +297,7 @@ class GameViewModel(app: Application, private val handle: SavedStateHandle) : An
                 copy(
                     session = nextSession, pileCounts = result.state.players.map { it.cardCount },
                     table = emptyList(), animating = false, trickWinner = null, battlers = emptySet(),
-                    collectTo = null, returning = false,
+                    collectTo = null, returning = false, awaitingContinue = false,
                 )
             }
             scheduleAutoFlip()
@@ -300,6 +332,7 @@ class GameViewModel(app: Application, private val handle: SavedStateHandle) : An
     private fun play(sfx: Sfx) = sounds?.play(sfx)
 
     private fun cancelJobs() {
+        continueSignal = null
         roundJob?.cancel()
         autoJob?.cancel()
     }
@@ -312,6 +345,7 @@ class GameViewModel(app: Application, private val handle: SavedStateHandle) : An
         const val KEY_SESSION = "session"
         const val KEY_SCREEN = "screen"
         const val AUTO_DELAY_MS = 1100L
+        const val AUTO_CONTINUE_MS = 900L
         const val SHUFFLE_SOUNDS = 5
         const val SHUFFLE_STEP_MS = 360L
         val json = Json { ignoreUnknownKeys = true }

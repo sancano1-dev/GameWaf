@@ -148,6 +148,10 @@ label is there for parents). The arrow button or Back returns to the menu.
   180° so players across the table see their cards upright. The round starts when everyone has tapped.
 - **Demo** (green tile): all seats play automatically. The parent area also has an
   **auto-play** toggle that works in any mode.
+- **Tap to continue:** after every round the cards stay on the table, with the winning card
+  highlighted and a pulsing paw in the middle, until someone taps anywhere on the screen. Then
+  the cards slide to the winner and the next round can start. Demo, auto-play and games with only
+  computer dogs left continue on their own after a short pause.
 - The pile is drawn as a stack whose height grows with card count, plus a small number for parents.
 - Tie: bark sound, screen shake and an animated manga **bark-off**: the tied dogs lunge at each
   other and take turns shouting "WOOF!" (OUAF ! / ¡GUAU! / WOEF!) in jagged speech balloons, with

@@ -97,6 +97,7 @@ fun GameScreen(
     onOpenParent: () -> Unit,
     onReplay: () -> Unit,
     onHome: () -> Unit,
+    onContinue: () -> Unit = {},
 ) {
     BackHandler { /* swallow: little hands hit Back a lot; parents leave via the parent area */ }
 
@@ -191,6 +192,9 @@ fun GameScreen(
             }
         }
 
+        // Round decided: one tap anywhere collects the cards and readies the next round.
+        if (ui.awaitingContinue) TapToContinue(onContinue)
+
         // Corner controls (sound + parent gate) at the edges where they disturb play least.
         val controlsAlignTop = rows.size == 1
         BigIconButton(
@@ -211,6 +215,33 @@ fun GameScreen(
 
         if (ui.showVictory) {
             VictoryOverlay(ui = ui, onReplay = onReplay, onHome = onHome)
+        }
+    }
+}
+
+/** Full-screen tap target with a pulsing paw and ripples in the middle: "tap to go on". */
+@Composable
+private fun TapToContinue(onContinue: () -> Unit) {
+    val pulse = rememberInfiniteTransition(label = "tap")
+    val t by pulse.animateFloat(0f, 1f, infiniteRepeatable(tween(1100)), label = "t")
+    Box(
+        Modifier
+            .fillMaxSize()
+            .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null, onClick = onContinue)
+            .semantics { contentDescription = "next round" },
+        contentAlignment = Alignment.Center,
+    ) {
+        Canvas(Modifier.size(170.dp)) {
+            val c = Offset(size.width / 2, size.height / 2)
+            val r = size.minDimension * 0.26f
+            // two ripples expanding outward
+            listOf(t, (t + 0.5f) % 1f).forEach { k ->
+                drawCircle(Ink.copy(alpha = 0.5f * (1f - k)), r * (1f + 0.9f * k), c, style = Stroke(size.minDimension * 0.025f))
+            }
+            val bob = 1f + 0.08f * sin(t * 2 * Math.PI.toFloat())
+            drawCircle(Color(0xFFFFD43B), r * bob, c)
+            drawCircle(Ink, r * bob, c, style = Stroke(size.minDimension * 0.03f))
+            drawPaw(Offset(c.x, c.y + r * 0.15f), r * 1.15f * bob, Ink)
         }
     }
 }

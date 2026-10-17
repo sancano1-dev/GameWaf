@@ -59,6 +59,7 @@ class MainActivity : ComponentActivity() {
                             onOpenParent = { parentOpen = true },
                             onReplay = viewModel::replay,
                             onHome = viewModel::goHome,
+                            onContinue = viewModel::onContinueTap,
                         )
                     } else {
                         HomeScreen(

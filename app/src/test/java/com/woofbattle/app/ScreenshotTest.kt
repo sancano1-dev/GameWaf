@@ -120,7 +120,7 @@ class ScreenshotTest {
         val ui = game(
             Mode.VS_CPU, listOf(List(17) { 3 }, List(13) { 2 }),
             listOf(TableCard(Card(100, 2), 0, true), TableCard(Card(101, 6), 1, true)),
-        ) { it.copy(trickWinner = 1) }
+        ) { it.copy(trickWinner = 1, awaitingContinue = true) }
         GameScreen(ui, settings, strings, ::noop, {}, {}, {}, {})
     }
 

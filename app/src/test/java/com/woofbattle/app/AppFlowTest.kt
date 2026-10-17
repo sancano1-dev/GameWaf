@@ -55,6 +55,17 @@ class AppFlowTest {
 
     private fun exists(description: String) = rule.onAllNodesWithContentDescription(description).fetchSemanticsNodes().isNotEmpty()
 
+    /** Lets the round play out, checks it waits on the table, then taps the screen to go on. */
+    private fun finishRound() {
+        var waited = 0
+        while (ui.game?.awaitingContinue != true && waited < 30_000) {
+            advance(500); waited += 500
+        }
+        assertTrue(ui.game!!.awaitingContinue, "a finished round should wait for a tap")
+        tap("next round")
+        advance(3000)
+    }
+
     /** On launch the child picks their dog first, then reaches the main menu. */
     private fun passDogPicker(dog: String = "Golden") {
         rule.mainClock.autoAdvance = false // time only moves when advance() says so
@@ -117,7 +128,7 @@ class AppFlowTest {
         assertEquals(listOf(18, 18), ui.game!!.pileCounts)
 
         tap("seat 0")
-        advance(8000)
+        finishRound()
         assertTrue(ui.game!!.game.round >= 1, "tapping my flip zone should play a round")
         assertEquals(DECK_SIZE, ui.game!!.game.totalCards)
         tap("seat 1") // the computer's zone is not tappable for the child
@@ -145,8 +156,40 @@ class AppFlowTest {
         advance(3000)
         assertEquals(0, ui.game!!.game.round, "round must wait for the 4th player")
         tap("seat 3")
-        advance(8000)
+        finishRound()
         assertTrue(ui.game!!.game.round >= 1)
+    }
+
+    @Test
+    fun every_round_waits_for_a_tap_on_the_screen() {
+        passDogPicker()
+        tap("play against dogs")
+        tap("1 vs 1")
+        advance(2500)
+        tap("seat 0")
+        var waited = 0
+        while (ui.game?.awaitingContinue != true && waited < 30_000) {
+            advance(500); waited += 500
+        }
+        assertTrue(ui.game!!.awaitingContinue)
+        assertTrue(ui.game!!.table.isNotEmpty(), "the round's cards stay on the table")
+        assertTrue(ui.game!!.trickWinner != null || ui.game!!.table.isNotEmpty())
+
+        advance(10_000)
+        assertTrue(ui.game!!.awaitingContinue, "nothing moves on without a tap")
+        assertEquals(0, ui.game!!.game.round)
+
+        tap("next round")
+        advance(3000)
+        assertFalse(ui.game!!.awaitingContinue)
+        assertTrue(ui.game!!.table.isEmpty(), "after the tap the cards go to the winner")
+        assertEquals(1, ui.game!!.game.round)
+        assertFalse(exists("next round"))
+
+        // and the next round plays again from my flip zone
+        tap("seat 0")
+        finishRound()
+        assertEquals(2, ui.game!!.game.round)
     }
 
     @Test
@@ -214,7 +257,7 @@ class AppFlowTest {
         tap("1 vs 2")
         advance(2500)
         tap("seat 0")
-        advance(8000)
+        finishRound()
         val before = ui.game!!.game
 
         rule.activity.onBackPressedDispatcher.onBackPressed()
