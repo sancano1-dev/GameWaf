@@ -1,0 +1,36 @@
+# Fiche Play Store — Français (fr-FR)
+
+## Nom de l'application (30 max)
+Woof Battle : jeu de bataille
+
+## Description courte (80 max)
+Le plus gros chien gagne ! Jeu de cartes hors ligne pour les 3-6 ans, sans pub.
+
+## Description complète (4000 max)
+Woof Battle, c'est le jeu de la bataille pensé pour les tout-petits qui ne savent pas encore lire ni compter : le plus gros chien gagne !
+
+🐶 COMMENT JOUER
+Chacun tape sur sa patte et retourne une carte en même temps. La carte avec le plus gros chien remporte toutes les cartes. Si les chiens ont la même taille, c'est la BATAILLE : les chiens se crient « OUAF ! » dessus et la bataille continue jusqu'à ce qu'un chien gagne. Celui qui rassemble toutes les cartes — ou le plus de cartes en partie courte — est le champion !
+
+👧 PENSÉ POUR LES 3–6 ANS
+• Aucune lecture nécessaire : images, couleurs, animations et sons expliquent tout
+• Très grands boutons, de simples appuis
+• Après chaque tour, les cartes restent sur la table jusqu'à un appui, pour bien voir qui a gagné
+• Chaque partie commence par un mélange : aucune partie ne se ressemble
+
+🎮 MODES DE JEU
+• 1 contre 1, 1 contre 2 ou 1 contre 3 face à des chiens de l'ordinateur
+• 2, 3 ou 4 enfants sur le même téléphone ou la même tablette, chacun dans son coin coloré
+• Mode démo pour découvrir le jeu
+
+🐕 CHOISIS TON CHIEN
+8 chiens style manga, chacun de sa couleur : Golden, Dalmatien, Beagle, Carlin, Corgi, Caniche, Husky et Teckel. Chaque joueur choisit un chien différent.
+
+✨ STYLE ANIME
+Traits d'encre, grands yeux brillants, lignes de vitesse, auras d'énergie, un concours d'aboiements à chaque égalité et un chien qui saute de joie pour le gagnant.
+
+👨‍👩‍👧 POUR LES PARENTS
+• 100 % hors ligne : pas d'accès internet, pas de pub, pas d'achats intégrés, aucune donnée collectée
+• Espace parents protégé par un appui de 3 secondes : durée de partie, son, trois styles de sons, jeu automatique, langue
+• English, Français, Español, Nederlands
+• Téléphones et tablettes, portrait et paysage

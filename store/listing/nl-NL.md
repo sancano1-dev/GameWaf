@@ -1,0 +1,36 @@
+# Play Store-vermelding — Nederlands (nl-NL)
+
+## App-naam (max. 30)
+Woof Battle: honden kaartspel
+
+## Korte beschrijving (max. 80)
+De grootste hond wint! Offline kaartspel voor kinderen van 3-6, zonder reclame.
+
+## Volledige beschrijving (max. 4000)
+Woof Battle is het klassieke kaartspel "oorlogje" voor de allerkleinsten die nog niet kunnen lezen of tellen: de grootste hond wint!
+
+🐶 ZO SPEEL JE
+Iedereen tikt op zijn pootje en draait tegelijk een kaart om. De kaart met de grootste hond wint alle kaarten. Zijn de honden even groot, dan is het OORLOG: de honden roepen "WOEF!" naar elkaar en het gevecht gaat door tot er één hond wint. Wie alle kaarten verzamelt — of de meeste kaarten in een kort spel — is de kampioen!
+
+👧 GEMAAKT VOOR PEUTERS EN KLEUTERS (3–6)
+• Lezen is niet nodig: plaatjes, kleuren, animaties en geluiden vertellen alles
+• Grote knoppen, alleen eenvoudig tikken
+• Na elke ronde blijven de kaarten op tafel liggen tot je tikt, zodat kinderen zien wie won
+• Elk spel begint met schudden, dus geen spel is hetzelfde
+
+🎮 SPEELWIJZEN
+• 1 tegen 1, 1 tegen 2 of 1 tegen 3 tegen vriendelijke computerhonden
+• 2, 3 of 4 kinderen op één telefoon of tablet, ieder in een eigen gekleurde hoek
+• Demomodus om te laten zien hoe het werkt
+
+🐕 KIES JE HOND
+8 honden in mangastijl, elk in een eigen kleur: Golden, Dalmatiër, Beagle, Mopshond, Corgi, Poedel, Husky en Teckel. Elke speler kiest een andere hond.
+
+✨ ANIMESTIJL
+Stevige inktlijnen, grote glanzende ogen, snelheidslijnen, krachtaura's, een blafwedstrijd bij elke gelijke stand en een springende hond voor de winnaar.
+
+👨‍👩‍👧 VOOR OUDERS
+• 100% offline: geen internettoegang, geen reclame, geen aankopen in de app, geen gegevensverzameling
+• Ouderhoek achter 3 seconden vasthouden: speelduur, geluid, drie geluidsstijlen, automatisch spelen, taal
+• English, Français, Español, Nederlands
+• Werkt op telefoons en tablets, staand en liggend
