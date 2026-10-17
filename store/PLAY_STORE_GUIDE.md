@@ -13,10 +13,10 @@
 | ✅ | Store texts EN / FR / ES / NL + "What's new" for 1.2 | `fastlane/metadata/android/<locale>/` |
 | ✅ | Icon 512×512, feature graphic 1024×500, 5 phone, 2 seven-inch, 3 ten-inch screenshots | `fastlane/metadata/android/en-US/images/` |
 | ✅ | Privacy policy web page (4 languages) | `docs/privacy-policy.html` |
-| ⬜ | **You:** your contact e-mail and developer name in `docs/privacy-policy.html` | |
-| ⬜ | **You:** the privacy policy online at a public URL (step 6) | |
-| ⬜ | **You:** back up the upload key (`keystore/` + `keystore.properties`, not in git) | |
-| ⬜ | **You:** confirm the package name `com.woofbattle.app` (permanent after the first upload) | |
+| ✅ | Contact e-mail on the policy and for the listing: `sancano1@gmail.com` | done |
+| ✅ | Privacy policy online: <https://sancano1-dev.github.io/GameWaf/privacy-policy.html> (GitHub Pages, repo public) | done |
+| ✅ | Package name confirmed: `com.woofbattle.app` | done |
+| ⬜ | **You:** keep a second copy of the upload key (`keystore/` + `keystore.properties`, not in git) somewhere safe | |
 | ⬜ | **You:** Play Console developer account, closed test, review | steps 1–5 |
 
 Graphics are rendered from the app's own code: `./gradlew :app:testDebugUnitTest -Pscreenshots` writes
