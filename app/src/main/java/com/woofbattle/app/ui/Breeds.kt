@@ -75,7 +75,8 @@ private fun shade(c: Color) = lerp(c, ShadowTint, 0.22f)
 /**
  * Draws [breed] sitting, paws on [groundY], centred on [cx], fitting an [s]-by-[s] box.
  * [wag] swings the tail in degrees; [happy] closes the eyes in a big grin; [aura] adds a
- * flickering power aura behind the dog ([phase] animates it).
+ * flickering power aura behind the dog ([phase] animates it). [bark] (0..1) opens the mouth in a
+ * shout; above 0.6 the eyes squeeze shut "> <" like a manga yell.
  */
 fun DrawScope.drawBreed(
     breed: Breed,
@@ -86,6 +87,7 @@ fun DrawScope.drawBreed(
     happy: Boolean = false,
     aura: Boolean = false,
     phase: Float = 0f,
+    bark: Float = 0f,
 ) {
     val b = breed
     val legH = b.legLength
@@ -292,7 +294,13 @@ fun DrawScope.drawBreed(
     // ---- Anime eyes with determined brows
     listOf(-1f, 1f).forEach { side ->
         val ex = side * 0.12f
-        if (happy) {
+        val shouting = bark > 0.6f
+        if (shouting) {
+            // squeezed "> <" eyes, pointing toward the nose
+            val tipX = ex - side * 0.045f
+            drawLine(Ink, o(ex + side * 0.05f, headY + 0.08f), o(tipX, headY + 0.03f), line * 1.6f, StrokeCap.Round)
+            drawLine(Ink, o(tipX, headY + 0.03f), o(ex + side * 0.05f, headY - 0.02f), line * 1.6f, StrokeCap.Round)
+        } else if (happy) {
             val arc = Path().apply {
                 val a = o(ex - 0.06f, headY + 0.01f); val c = o(ex, headY + 0.1f); val e = o(ex + 0.06f, headY + 0.01f)
                 moveTo(a.x, a.y); quadraticTo(c.x, c.y, e.x, e.y)
@@ -313,8 +321,8 @@ fun DrawScope.drawBreed(
         // eyebrow: inner end lower = determined; raised when happy
         drawLine(
             Ink,
-            o(side * 0.05f, headY + if (happy) 0.17f else 0.14f),
-            o(side * 0.19f, headY + if (happy) 0.17f else 0.2f),
+            o(side * 0.05f, headY + if (bark > 0.05f) 0.12f else if (happy) 0.17f else 0.14f),
+            o(side * 0.19f, headY + if (bark > 0.05f) 0.21f else if (happy) 0.17f else 0.2f),
             line * 1.5f,
             StrokeCap.Round,
         )
@@ -332,7 +340,17 @@ fun DrawScope.drawBreed(
     ink(ovalPath(0f, headY - 0.06f, 0.13f, 0.085f), Ink)
     dot(Color.White.copy(alpha = 0.7f), -0.03f, headY - 0.045f, 0.016f)
     val mouthInk = if (b.face == FacePattern.DARK_MASK) Color(0xFFB8A79A) else Ink
-    if (happy || b.tongue) {
+    if (bark > 0.05f) {
+        // big shouting mouth, opening with [bark]
+        val open = 0.08f + 0.16f * bark.coerceAtMost(1f)
+        val mouth = ovalPath(0f, headY - 0.13f - open / 2, 0.22f, open)
+        drawPath(mouth, Color(0xFF6E1626))
+        clipPath(mouth) { drawPath(ovalPath(0f, headY - 0.13f - open * 0.95f, 0.16f, open * 0.6f), Color(0xFFFF6F8A)) }
+        drawPath(mouth, Ink, style = Stroke(line, join = StrokeJoin.Round))
+        listOf(-1f, 1f).forEach { side ->
+            ink(polyPath(side * 0.085f to headY - 0.13f, side * 0.05f to headY - 0.13f, side * 0.07f to headY - 0.13f - open * 0.35f), Color.White, outline = line * 0.6f)
+        }
+    } else if (happy || b.tongue) {
         val grin = Path().apply {
             val a = o(-0.09f, headY - 0.12f); val c = o(0f, headY - 0.26f); val e = o(0.09f, headY - 0.12f)
             moveTo(a.x, a.y); quadraticTo(c.x, c.y, e.x, e.y); close()

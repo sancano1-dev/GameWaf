@@ -96,19 +96,7 @@ fun VictoryOverlay(ui: GameUi, onReplay: () -> Unit, onHome: () -> Unit) {
                     }
                 }
             }
-            Canvas(Modifier.size(unit * 0.36f)) {
-                val hop = abs(sin(time * 5f)) * size.height * 0.08f
-                drawBreed(
-                    ui.dogOf(status.winners.first()),
-                    cx = size.width / 2,
-                    groundY = size.height * 0.98f - hop,
-                    s = size.height * 0.9f,
-                    wag = sin(time * 14f) * 28f,
-                    happy = true,
-                    aura = true,
-                    phase = time,
-                )
-            }
+            JumpingDog(ui.dogOf(status.winners.first()), Modifier.size(unit * 0.5f, unit * 0.48f))
             Row(horizontalArrangement = Arrangement.spacedBy(unit * 0.08f)) {
                 val btn = max(MinTouch, unit * 0.2f)
                 BigIconButton(onReplay, Color(0xFF3FB560), "replay", size = btn) { iconReplay(Color.White) }

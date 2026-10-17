@@ -207,7 +207,7 @@ fun GameScreen(
         )
 
         if (ui.dealing) ShuffleIntro(cardW, cardH, Modifier.align(Alignment.Center))
-        WoofBanner(ui.woof, strings.woof, Modifier.fillMaxSize(), min(maxWidth, maxHeight) * 0.85f)
+        BarkOff(ui.woof, ui.battlers.sorted().map { ui.dogOf(it) }, strings.woof, Modifier.fillMaxSize())
 
         if (ui.showVictory) {
             VictoryOverlay(ui = ui, onReplay = onReplay, onHome = onHome)
@@ -393,52 +393,3 @@ private fun DrawScope.drawIntoCardBack(w: Float, h: Float) {
     drawContext.size = old
 }
 
-/** Manga impact panel for a tie: full-screen speed lines, a jagged burst and inked "WOOF!" lettering. */
-@Composable
-private fun WoofBanner(visible: Boolean, text: String, modifier: Modifier, maxSize: Dp) {
-    AnimatedVisibility(
-        visible = visible,
-        modifier = modifier,
-        enter = scaleIn(spring(dampingRatio = 0.4f, stiffness = 300f), initialScale = 0.3f) + fadeIn(),
-        exit = scaleOut(targetScale = 1.3f) + fadeOut(),
-    ) {
-        val pulse = rememberInfiniteTransition(label = "impact")
-        val beat by pulse.animateFloat(0.96f, 1.04f, infiniteRepeatable(tween(140), RepeatMode.Reverse), label = "b")
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Canvas(Modifier.fillMaxSize()) {
-                val c = Offset(size.width / 2, size.height / 2)
-                drawSpeedLines(c, size.minDimension * 0.32f, size.maxDimension, Ink.copy(alpha = 0.55f), count = 70, seed = 3)
-            }
-            val burst = min(maxSize, 380.dp)
-            Box(Modifier.size(burst).scale(beat), contentAlignment = Alignment.Center) {
-                Canvas(Modifier.fillMaxSize()) {
-                    val c = Offset(size.width / 2, size.height / 2)
-                    val outer = size.minDimension / 2
-                    fun jagged(scale: Float, seed: Int): Path {
-                        val r = kotlin.random.Random(seed)
-                        val p = Path()
-                        val points = 16
-                        for (i in 0 until points * 2) {
-                            val rr = outer * scale * (if (i % 2 == 0) 0.88f + r.nextFloat() * 0.12f else 0.6f + r.nextFloat() * 0.08f)
-                            val a = Math.PI * i / points
-                            val pt = Offset(c.x + (rr * cos(a)).toFloat(), c.y + (rr * sin(a)).toFloat())
-                            if (i == 0) p.moveTo(pt.x, pt.y) else p.lineTo(pt.x, pt.y)
-                        }
-                        p.close()
-                        return p
-                    }
-                    val big = jagged(1f, 5)
-                    drawPath(big, Color(0xFFFFD43B))
-                    drawPath(jagged(0.72f, 9), Color(0xFFFF8A3D))
-                    drawPath(big, Ink, style = Stroke(outer * 0.045f, join = StrokeJoin.Miter))
-                }
-                val fontSize = (burst.value * 0.21f).sp
-                Box(Modifier.graphicsLayer { rotationZ = -8f }, contentAlignment = Alignment.Center) {
-                    Text(text, fontSize = fontSize, fontWeight = FontWeight.Black, color = Ink, style = TextStyle(drawStyle = Stroke(width = 22f, join = StrokeJoin.Round)))
-                    Text(text, fontSize = fontSize, fontWeight = FontWeight.Black, color = Color(0xFFE63946))
-                    Text(text, fontSize = fontSize, fontWeight = FontWeight.Black, color = Color.White.copy(alpha = 0.9f), style = TextStyle(drawStyle = Stroke(width = 3f)))
-                }
-            }
-        }
-    }
-}

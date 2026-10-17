@@ -1,6 +1,7 @@
 package com.woofbattle.app
 
 import android.graphics.Bitmap
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -168,6 +169,43 @@ class ScreenshotTest {
     @Config(qualifiers = "w411dp-h1500dp-xxhdpi")
     fun parent_area() = shoot("parent_area") {
         ParentArea(settings.copy(lang = Lang.ES, soundTheme = SoundTheme.SILLY), Strings.of(Lang.ES), inGame = true, onChange = {}, onChooseSoundTheme = {}, onQuitGame = {}, onClose = {})
+    }
+
+    /** Captures [frames] frames, [stepMs] apart, of an animated scene into build/screenshots/<name>/. */
+    private fun frames(name: String, frames: Int, stepMs: Long, content: @Composable () -> Unit) {
+        rule.mainClock.autoAdvance = false
+        rule.setContent { WoofTheme { content() } }
+        rule.mainClock.advanceTimeBy(400)
+        val dir = File(System.getProperty("screenshotDir") ?: "build/screenshots", name).apply { mkdirs() }
+        repeat(frames) { i ->
+            val bmp = rule.onRoot().captureToImage().asAndroidBitmap()
+            File(dir, "f%03d.png".format(i)).outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
+            rule.mainClock.advanceTimeBy(stepMs)
+        }
+    }
+
+    @Test
+    @Config(qualifiers = "w640dp-h400dp-mdpi")
+    fun bark_off_animation() = frames("bark_off", 26, 40) {
+        androidx.compose.foundation.layout.Box(Modifier.fillMaxSize().background(com.woofbattle.app.ui.Cream)) {
+            com.woofbattle.app.ui.BarkOff(true, listOf(Breed.CORGI, Breed.HUSKY), "WOOF!", Modifier.fillMaxSize())
+        }
+    }
+
+    @Test
+    @Config(qualifiers = "w640dp-h400dp-mdpi")
+    fun bark_off_three_dogs() = shoot("bark_off_three", settleMs = 620) {
+        androidx.compose.foundation.layout.Box(Modifier.fillMaxSize().background(com.woofbattle.app.ui.Cream)) {
+            com.woofbattle.app.ui.BarkOff(true, listOf(Breed.PUG, Breed.POODLE, Breed.DALMATIAN), "¡GUAU!", Modifier.fillMaxSize())
+        }
+    }
+
+    @Test
+    @Config(qualifiers = "w400dp-h400dp-mdpi")
+    fun jump_animation() = frames("jump", 27, 40) {
+        androidx.compose.foundation.layout.Box(Modifier.fillMaxSize().background(androidx.compose.ui.graphics.Color(0xFF4A3426))) {
+            com.woofbattle.app.ui.JumpingDog(Breed.GOLDEN, Modifier.fillMaxSize())
+        }
     }
 
     @Test

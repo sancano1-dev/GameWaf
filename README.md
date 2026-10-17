@@ -20,6 +20,10 @@ Nobody needs to read or count: the bigger dog wins.
   <img src="docs/screenshots/game_vs_cpu_portrait.png" width="200" alt="Playing against a dog">
   <img src="docs/screenshots/victory.png" width="200" alt="Victory">
 </p>
+<p>
+  <img src="docs/screenshots/bark_off.gif" width="400" alt="Tie: the dogs shout WOOF at each other">
+  <img src="docs/screenshots/victory_jump.gif" width="300" alt="Victory: the winner dog jumps for joy">
+</p>
 <img src="docs/screenshots/game_together_4p_landscape_woof.png" width="600" alt="Woof battle, 4 players">
 <img src="docs/screenshots/all_breeds.png" width="600" alt="The 8 dogs">
 
@@ -145,8 +149,11 @@ label is there for parents). The arrow button or Back returns to the menu.
 - **Demo** (green tile): all seats play automatically. The parent area also has an
   **auto-play** toggle that works in any mode.
 - The pile is drawn as a stack whose height grows with card count, plus a small number for parents.
-- Tie: bark sound, screen shake, spinning "WOOF!" burst (OUAF ! / ¡GUAU! / WOEF! by language).
-- Victory: confetti, winner badge with crown, tail-wagging dog, replay and home buttons.
+- Tie: bark sound, screen shake and an animated manga **bark-off**: the tied dogs lunge at each
+  other and take turns shouting "WOOF!" (OUAF ! / ¡GUAU! / WOEF!) in jagged speech balloons, with
+  anger marks and speed lines.
+- Victory: confetti, turning gold rays, winner badge with crown and an animated manga **jump**:
+  the winner dog squashes, springs up with a power aura, lands in dust puffs among sparkles.
 - **Parent area:** hold the gear button for 3 seconds (a ring fills up). It sets the number of
   players in the demo (the other modes choose it on their picker), game
   length, sound on/off, **sound style** (tap a style to hear its bark), auto-play and
