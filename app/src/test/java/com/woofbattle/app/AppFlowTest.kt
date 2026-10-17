@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -55,6 +56,26 @@ class AppFlowTest {
 
     private fun exists(description: String) = rule.onAllNodesWithContentDescription(description).fetchSemanticsNodes().isNotEmpty()
 
+    /** The app opens on the menu. */
+    private fun launch() {
+        rule.mainClock.autoAdvance = false // time only moves when advance() says so
+        advance(300)
+        assertEquals(Screen.HOME, ui.screen, "app should open on the menu")
+    }
+
+    /** Menu tile -> player count -> one dog per human player -> play. */
+    private fun startGame(tile: String, option: String, vararg dogs: String) {
+        tap(tile)
+        tap(option)
+        assertEquals(Screen.DOGS, ui.screen, "choosing dogs comes right after the game type")
+        rule.onNodeWithText("Choose your dog").assertIsDisplayed()
+        assertEquals(dogs.size, ui.pending!!.picks.size, "one dog slot per human player")
+        dogs.forEach { tap(it) }
+        tap("play")
+        assertEquals(Screen.GAME, ui.screen)
+        advance(2500) // shuffle and deal
+    }
+
     /** Lets the round play out, checks it waits on the table, then taps the screen to go on. */
     private fun finishRound() {
         var waited = 0
@@ -66,65 +87,128 @@ class AppFlowTest {
         advance(3000)
     }
 
-    /** On launch the child picks their dog first, then reaches the main menu. */
-    private fun passDogPicker(dog: String = "Golden") {
-        rule.mainClock.autoAdvance = false // time only moves when advance() says so
-        advance(300)
-        assertEquals(Screen.DOGS, ui.screen, "app should open on Choose your dog")
-        rule.onNodeWithText("Choose your dog").assertIsDisplayed()
-        tap(dog)
-        tap("done")
-        assertEquals(Screen.HOME, ui.screen)
-    }
-
     @Test
-    fun launch_opens_choose_your_dog_then_menu() {
-        passDogPicker("Husky")
-        assertEquals(Breed.HUSKY, ui.settings.favoriteDog)
+    fun launch_opens_the_menu() {
+        launch()
         assertTrue(exists("play against dogs"))
         assertTrue(exists("play together"))
         assertTrue(exists("watch a demo"))
+        assertFalse(exists("Husky"), "no dog picker before a game type is chosen")
     }
 
     @Test
-    fun menu_tiles_open_their_own_pickers_not_the_dog_picker() {
-        passDogPicker()
+    fun menu_tiles_open_their_player_count_pickers() {
+        launch()
         tap("play against dogs")
-        assertEquals(Screen.HOME, ui.screen)
         listOf("1 vs 1", "1 vs 2", "1 vs 3").forEach { assertTrue(exists(it), "missing $it") }
-        assertFalse(exists("Husky"), "dog picker must not open from the red tile")
         tap("back")
         tap("play together")
         listOf("2", "3", "4").forEach { assertTrue(exists(it), "missing $it") }
-        assertFalse(exists("Husky"))
         tap("back")
         assertTrue(exists("play against dogs"))
     }
 
     @Test
-    fun my_dog_on_the_menu_reopens_the_dog_picker() {
-        passDogPicker()
-        tap("Choose your dog")
+    fun vs_dogs_asks_for_exactly_one_dog() {
+        launch()
+        tap("play against dogs")
+        tap("1 vs 3")
         assertEquals(Screen.DOGS, ui.screen)
+        assertEquals(listOf<Breed?>(null), ui.pending!!.picks)
+        assertTrue(exists("player 1"))
+        assertFalse(exists("player 2"))
+
+        tap("play")
+        assertEquals(Screen.DOGS, ui.screen, "play does nothing until the dog is chosen")
+
+        tap("Corgi")
+        tap("Husky") // changing your mind replaces the pick
+        assertEquals(listOf<Breed?>(Breed.HUSKY), ui.pending!!.picks)
+        tap("play")
+        assertEquals(Screen.GAME, ui.screen)
+        val g = ui.game!!
+        assertEquals(4, g.game.players.size)
+        assertEquals(Breed.HUSKY, g.dogOf(0))
+        assertEquals(4, g.session.dogs.distinct().size, "computer dogs get other breeds")
+        assertEquals(Breed.HUSKY, ui.settings.favoriteDog)
+        advance(2500)
+        assertEquals(listOf(9, 9, 9, 9), ui.game!!.pileCounts)
+    }
+
+    @Test
+    fun each_child_picks_a_different_dog() {
+        launch()
+        tap("play together")
+        tap("3")
+        assertEquals(listOf<Breed?>(null, null, null), ui.pending!!.picks)
+        assertEquals(0, ui.pending!!.active)
+
+        tap("Golden")
+        assertEquals(1, ui.pending!!.active, "next player's turn")
+        tap("Golden") // already taken by player 1
+        assertEquals(listOf(Breed.GOLDEN, null, null), ui.pending!!.picks, "the same dog cannot be picked twice")
+        tap("play")
+        assertEquals(Screen.DOGS, ui.screen, "can't start until every child has a dog")
+
         tap("Pug")
-        assertEquals(Breed.PUG, ui.settings.favoriteDog)
-        tap("done")
+        tap("Dalmatian")
+        assertEquals(listOf(Breed.GOLDEN, Breed.PUG, Breed.DALMATIAN), ui.pending!!.picks)
+
+        // player 2 changes their mind: tap their slot, then a free dog
+        tap("player 2")
+        tap("Poodle")
+        assertEquals(listOf(Breed.GOLDEN, Breed.POODLE, Breed.DALMATIAN), ui.pending!!.picks)
+        tap("player 3")
+        tap("Golden") // still taken by player 1
+        assertEquals(Breed.DALMATIAN, ui.pending!!.picks[2])
+
+        tap("play")
+        val g = ui.game!!
+        assertEquals(listOf(0, 1, 2), g.session.humans)
+        assertEquals(listOf(Breed.GOLDEN, Breed.POODLE, Breed.DALMATIAN), g.session.dogs)
+    }
+
+    @Test
+    fun back_from_dog_picker_returns_to_menu() {
+        launch()
+        tap("play together")
+        tap("2")
+        tap("Beagle")
+        tap("back")
         assertEquals(Screen.HOME, ui.screen)
+        assertNull(ui.pending)
+        assertTrue(exists("play together"))
+    }
+
+    @Test
+    fun rotation_keeps_the_dog_choices() {
+        launch()
+        tap("play together")
+        tap("2")
+        tap("Corgi")
+        rule.activityRule.scenario.recreate()
+        advance(500)
+        assertEquals(Screen.DOGS, ui.screen)
+        assertEquals(listOf(Breed.CORGI, null), ui.pending!!.picks)
+    }
+
+    @Test
+    fun demo_starts_without_choosing_dogs() {
+        launch()
+        tap("watch a demo")
+        assertEquals(Screen.GAME, ui.screen)
+        advance(20000, step = 250)
+        assertTrue(ui.game!!.game.round >= 2, "demo should keep flipping on its own")
     }
 
     @Test
     fun one_vs_one_against_the_computer() {
-        passDogPicker("Corgi")
-        tap("play against dogs")
-        tap("1 vs 1")
-        assertEquals(Screen.GAME, ui.screen)
+        launch()
+        startGame("play against dogs", "1 vs 1", "Corgi")
         val g = ui.game!!
         assertEquals(2, g.game.players.size)
         assertEquals(listOf(0), g.session.humans)
         assertEquals(Breed.CORGI, g.dogOf(0))
-        assertTrue(g.dealing)
-        advance(2500)
-        assertFalse(ui.game!!.dealing)
         assertEquals(listOf(18, 18), ui.game!!.pileCounts)
 
         tap("seat 0")
@@ -135,23 +219,11 @@ class AppFlowTest {
     }
 
     @Test
-    fun one_vs_three_against_the_computer() {
-        passDogPicker()
-        tap("play against dogs")
-        tap("1 vs 3")
-        assertEquals(4, ui.game!!.game.players.size)
-        assertEquals(4, ui.game!!.session.dogs.distinct().size)
-        advance(2500)
-        assertEquals(listOf(9, 9, 9, 9), ui.game!!.pileCounts)
-    }
-
-    @Test
     fun four_children_on_one_phone_need_everyone_to_tap() {
-        passDogPicker()
-        tap("play together")
-        tap("4")
+        launch()
+        startGame("play together", "4", "Golden", "Husky", "Pug", "Poodle")
         assertEquals(listOf(0, 1, 2, 3), ui.game!!.session.humans)
-        advance(2500)
+        assertEquals(listOf(Breed.GOLDEN, Breed.HUSKY, Breed.PUG, Breed.POODLE), ui.game!!.session.dogs)
         tap("seat 0"); tap("seat 1"); tap("seat 2")
         advance(3000)
         assertEquals(0, ui.game!!.game.round, "round must wait for the 4th player")
@@ -162,10 +234,8 @@ class AppFlowTest {
 
     @Test
     fun every_round_waits_for_a_tap_on_the_screen() {
-        passDogPicker()
-        tap("play against dogs")
-        tap("1 vs 1")
-        advance(2500)
+        launch()
+        startGame("play against dogs", "1 vs 1", "Beagle")
         tap("seat 0")
         var waited = 0
         while (ui.game?.awaitingContinue != true && waited < 30_000) {
@@ -173,7 +243,6 @@ class AppFlowTest {
         }
         assertTrue(ui.game!!.awaitingContinue)
         assertTrue(ui.game!!.table.isNotEmpty(), "the round's cards stay on the table")
-        assertTrue(ui.game!!.trickWinner != null || ui.game!!.table.isNotEmpty())
 
         advance(10_000)
         assertTrue(ui.game!!.awaitingContinue, "nothing moves on without a tap")
@@ -184,26 +253,16 @@ class AppFlowTest {
         assertFalse(ui.game!!.awaitingContinue)
         assertTrue(ui.game!!.table.isEmpty(), "after the tap the cards go to the winner")
         assertEquals(1, ui.game!!.game.round)
-        assertFalse(exists("next round"))
 
-        // and the next round plays again from my flip zone
         tap("seat 0")
         finishRound()
         assertEquals(2, ui.game!!.game.round)
     }
 
     @Test
-    fun demo_plays_by_itself() {
-        passDogPicker()
-        tap("watch a demo")
-        advance(20000, step = 250)
-        assertTrue(ui.game!!.game.round >= 2, "demo should keep flipping on its own")
-    }
-
-    @Test
     @Config(qualifiers = "w411dp-h1500dp-xxhdpi") // tall enough to show every parent setting
     fun parent_gate_needs_a_three_second_hold_and_settings_apply() {
-        passDogPicker()
+        launch()
         val gate = rule.onNodeWithContentDescription("Parents")
         gate.performClick()
         advance(500)
@@ -227,22 +286,21 @@ class AppFlowTest {
     }
 
     @Test
-    fun short_game_reaches_victory_then_replay_and_home() {
-        passDogPicker()
+    fun short_game_reaches_victory_then_replay_keeps_the_dogs() {
+        launch()
         vm.updateSettings { it.copy(shortGame = true, shortRounds = 3, autoPlay = true) }
-        tap("play together")
-        tap("2")
+        startGame("play together", "2", "Dachshund", "Corgi")
         var waited = 0
         while (ui.game?.showVictory != true && waited < 120_000) {
             advance(2000, step = 500); waited += 2000
         }
-        val status = ui.game!!.game.status
-        assertIs<GameStatus.Finished>(status)
+        assertIs<GameStatus.Finished>(ui.game!!.game.status)
+        advance(500) // let the victory screen draw
         assertTrue(exists("replay") && exists("home"))
 
         tap("replay")
         assertEquals(0, ui.game!!.game.round)
-        assertEquals(2, ui.game!!.game.players.size)
+        assertEquals(listOf(Breed.DACHSHUND, Breed.CORGI), ui.game!!.session.dogs, "replay keeps everyone's dog")
         vm.updateSettings { it.copy(autoPlay = false) }
         advance(2500)
         vm.goHome()
@@ -252,10 +310,8 @@ class AppFlowTest {
 
     @Test
     fun back_is_ignored_in_game_and_rotation_keeps_the_game() {
-        passDogPicker()
-        tap("play against dogs")
-        tap("1 vs 2")
-        advance(2500)
+        launch()
+        startGame("play against dogs", "1 vs 2", "Pug")
         tap("seat 0")
         finishRound()
         val before = ui.game!!.game

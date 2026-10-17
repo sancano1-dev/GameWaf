@@ -42,12 +42,16 @@ class MainActivity : ComponentActivity() {
 
                 Box(Modifier.fillMaxSize()) {
                     val game = app.game
-                    if (app.screen == Screen.DOGS) {
+                    val pending = app.pending
+                    if (app.screen == Screen.DOGS && pending != null) {
                         DogPicker(
-                            selected = app.settings.favoriteDog,
+                            picks = pending.picks,
+                            active = pending.active,
                             strings = strings,
-                            onSelect = viewModel::chooseFavoriteDog,
-                            onDone = viewModel::closeDogPicker,
+                            onPick = viewModel::pickDog,
+                            onSelectPlayer = viewModel::selectPicker,
+                            onBack = viewModel::cancelDogPicker,
+                            onPlay = viewModel::startPendingGame,
                         )
                     } else if (app.screen == Screen.GAME && game != null) {
                         GameScreen(
@@ -65,10 +69,9 @@ class MainActivity : ComponentActivity() {
                         HomeScreen(
                             settings = app.settings,
                             strings = strings,
-                            onStart = viewModel::startGame,
+                            onStart = viewModel::chooseGame,
                             onToggleSound = toggleSound,
                             onOpenParent = { parentOpen = true },
-                            onOpenDogPicker = viewModel::openDogPicker,
                         )
                     }
                     if (parentOpen) {

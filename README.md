@@ -114,14 +114,17 @@ GameOver). The ViewModel replays those events as animations. The RNG state is st
 
 ## Modes and UX
 
-**Launch flow:** every time the app starts it opens on **Choose your dog**, which shows 8 big
-picture tiles. The child taps a dog (it barks, smiles and gets a crown), then the green check
-leads to the main menu. Rotating the screen or returning from the background does not show the
-picker again; only a fresh start does.
+**Flow:** the app opens on the menu. Pick a game type (red = against dogs, blue = together),
+then how many play. **Choose your dog** follows, with one coloured slot per human player:
+1 slot against the computer, 2–4 slots for children sharing the phone. The slot with the gold
+ring is choosing; tapping a dog gives it to that player (it barks and gets the player's colour)
+and moves on to the next player. **A dog already taken by another player can't be chosen.**
+Tap a player's slot to change their dog. The green play button starts the game once every player
+has a dog; Back returns to the menu. The demo has no human players, so it starts straight away.
 
 **Dog-park menu:** the home screen has a warm background with paw prints and bones, the title on
-a bone-shaped plate, and stitched tiles. The child's own dog sits at the top: tap it to go back
-to **Choose your dog**. Each breed is a caricature in its own colour:
+a bone-shaped plate, and stitched tiles. The dog player 1 chose last time sits at the top.
+Each breed is a caricature in its own colour:
 
 | Breed | Colour / look |
 |---|---|
@@ -134,9 +137,8 @@ to **Choose your dog**. Each breed is a caricature in its own colour:
 | Husky | blue-grey, white mask, blue eyes |
 | Dachshund | chocolate, long "sausage" body |
 
-The chosen dog barks hello, is remembered, and is the child's seat avatar in games, on the
-"vs dogs" tile and on the victory screen. The other seats (other children or computer dogs) get
-different breeds, picked at random for each game.
+Each chosen dog is that player's seat avatar in the game and on the victory screen. Computer
+dogs get different breeds, picked at random for each game. Replay keeps everyone's dog.
 
 Tapping the red or blue tile opens a picker with three big picture tiles (a small corner
 label is there for parents). The arrow button or Back returns to the menu.

@@ -23,8 +23,21 @@ import kotlinx.serialization.json.Json
 
 enum class Mode { VS_CPU, TOGETHER, DEMO }
 
-/** DOGS = "Choose your dog", shown first on every launch and from the menu. */
-enum class Screen { DOGS, HOME, GAME }
+/** DOGS = "Choose your dog", shown after picking a game type, one dog per human player. */
+enum class Screen { HOME, DOGS, GAME }
+
+/** A game being set up: each human player picks a different dog before it starts. */
+@Serializable
+data class PendingGame(
+    val mode: Mode,
+    val players: Int,
+    /** One entry per human player, in seat order; null = not chosen yet. */
+    val picks: List<Breed?>,
+    /** Which player is choosing now. */
+    val active: Int = 0,
+) {
+    val complete: Boolean get() = picks.none { it == null }
+}
 
 /** What must survive rotation and process death: the mode, which seats are human, the engine state. */
 @Serializable
@@ -68,9 +81,10 @@ data class GameUi(
 }
 
 data class AppUi(
-    val screen: Screen = Screen.DOGS,
+    val screen: Screen = Screen.HOME,
     val settings: Settings = Settings(),
     val game: GameUi? = null,
+    val pending: PendingGame? = null,
 )
 
 class GameViewModel(app: Application, private val handle: SavedStateHandle) : AndroidViewModel(app) {
@@ -101,7 +115,72 @@ class GameViewModel(app: Application, private val handle: SavedStateHandle) : An
      * Starts a fresh, randomly shuffled game. [players] is the total number of seats: in
      * [Mode.VS_CPU] that is the child plus players - 1 computer dogs (2 = one-against-one).
      */
-    fun startGame(mode: Mode, players: Int = _ui.value.settings.playerCount) {
+    /**
+     * The child picked a game type and player count. Demo starts at once; otherwise every human
+     * player first chooses a dog (1 for "vs dogs", one per child for "together").
+     */
+    fun chooseGame(mode: Mode, players: Int) {
+        if (mode == Mode.DEMO) return startGame(mode, players)
+        val humans = if (mode == Mode.VS_CPU) 1 else players
+        val pending = PendingGame(mode, players, List(humans) { null })
+        savePending(pending)
+        handle[KEY_SCREEN] = Screen.DOGS.name
+        _ui.update { it.copy(screen = Screen.DOGS, pending = pending) }
+        play(Sfx.TAP)
+    }
+
+    /** Tap on a player's slot: that player chooses (or changes) their dog next. */
+    fun selectPicker(player: Int) {
+        val p = _ui.value.pending ?: return
+        if (player !in p.picks.indices) return
+        updatePending(p.copy(active = player))
+    }
+
+    /** The active player taps a dog. A dog already taken by another player cannot be chosen. */
+    fun pickDog(dog: Breed) {
+        val p = _ui.value.pending ?: return
+        val owner = p.picks.indexOf(dog)
+        if (owner >= 0 && owner != p.active) {
+            play(Sfx.SAD)
+            return
+        }
+        val picks = p.picks.toMutableList().also { it[p.active] = dog }
+        val nextActive = picks.indices.firstOrNull { picks[it] == null && it > p.active }
+            ?: picks.indices.firstOrNull { picks[it] == null }
+            ?: p.active
+        updatePending(p.copy(picks = picks, active = nextActive))
+        play(Sfx.BARK)
+    }
+
+    /** Green play button: everyone has a dog, start the game. */
+    fun startPendingGame() {
+        val p = _ui.value.pending ?: return
+        if (!p.complete) return
+        startGame(p.mode, p.players, p.picks.filterNotNull())
+    }
+
+    /** Back from Choose your dog: return to the menu. */
+    fun cancelDogPicker() {
+        savePending(null)
+        handle[KEY_SCREEN] = Screen.HOME.name
+        _ui.update { it.copy(screen = Screen.HOME, pending = null) }
+    }
+
+    private fun updatePending(p: PendingGame) {
+        savePending(p)
+        _ui.update { it.copy(pending = p) }
+    }
+
+    private fun savePending(p: PendingGame?) {
+        if (p == null) handle.remove<String>(KEY_PENDING)
+        else handle[KEY_PENDING] = json.encodeToString(PendingGame.serializer(), p)
+    }
+
+    /**
+     * Starts a fresh, randomly shuffled game. [humanDogs] are the dogs the human players chose, in
+     * seat order; the other seats get different random breeds.
+     */
+    fun startGame(mode: Mode, players: Int = _ui.value.settings.playerCount, humanDogs: List<Breed> = emptyList()) {
         cancelJobs()
         val count = players.coerceIn(2, 4)
         if (count != _ui.value.settings.playerCount) updateSettings { it.copy(playerCount = count) }
@@ -112,9 +191,12 @@ class GameViewModel(app: Application, private val handle: SavedStateHandle) : An
             Mode.DEMO -> emptyList()
         }
         val game = GameEngine.newGame(config, seed = System.nanoTime())
-        val session = Session(mode, humans, game, dogsFor(config.playerCount))
+        val dogs = dogsFor(config.playerCount, humanDogs)
+        humanDogs.firstOrNull()?.let { first -> if (first != _ui.value.settings.favoriteDog) updateSettings { it.copy(favoriteDog = first) } }
+        val session = Session(mode, humans, game, dogs)
+        savePending(null)
         persist(session, Screen.GAME)
-        _ui.update { it.copy(screen = Screen.GAME, game = GameUi(session, game.players.map { 0 }, dealing = true)) }
+        _ui.update { it.copy(screen = Screen.GAME, pending = null, game = GameUi(session, game.players.map { 0 }, dealing = true)) }
         play(Sfx.TAP)
         roundJob = viewModelScope.launch {
             repeat(SHUFFLE_SOUNDS) {
@@ -127,21 +209,16 @@ class GameViewModel(app: Application, private val handle: SavedStateHandle) : An
         }
     }
 
-/** Seat 0 gets the favourite dog; the others get different, randomly picked breeds. */
-    private fun dogsFor(players: Int): List<Breed> {
-        val fav = _ui.value.settings.favoriteDog
-        return listOf(fav) + (Breed.entries - fav).shuffled().take(players - 1)
-    }
-
-    /** The child picked their dog: remember it and let it bark hello. */
-    fun chooseFavoriteDog(dog: Breed) {
-        updateSettings { it.copy(favoriteDog = dog) }
-        play(Sfx.BARK)
+/** Human seats get their chosen dogs (or the favourite); the others get different random breeds. */
+    private fun dogsFor(players: Int, chosen: List<Breed>): List<Breed> {
+        val first = chosen.distinct().take(players).ifEmpty { listOf(_ui.value.settings.favoriteDog) }
+        return first + (Breed.entries - first.toSet()).shuffled().take(players - first.size)
     }
 
     fun replay() {
         val g = _ui.value.game ?: return startGame(Mode.VS_CPU)
-        startGame(g.session.mode, g.game.players.size)
+        // same players, same dogs
+        startGame(g.session.mode, g.game.players.size, g.session.dogs.take(g.session.humans.size))
     }
 
     fun goHome() {
@@ -149,16 +226,6 @@ class GameViewModel(app: Application, private val handle: SavedStateHandle) : An
         handle.remove<String>(KEY_SESSION)
         handle[KEY_SCREEN] = Screen.HOME.name
         _ui.update { it.copy(screen = Screen.HOME, game = null) }
-    }
-
-    fun openDogPicker() = showScreen(Screen.DOGS)
-
-    /** Green check on Choose your dog: on to the main menu. */
-    fun closeDogPicker() = showScreen(Screen.HOME)
-
-    private fun showScreen(screen: Screen) {
-        handle[KEY_SCREEN] = screen.name
-        _ui.update { it.copy(screen = screen) }
     }
 
     fun updateSettings(transform: (Settings) -> Settings) {
@@ -316,16 +383,20 @@ class GameViewModel(app: Application, private val handle: SavedStateHandle) : An
         val session = handle.get<String>(KEY_SESSION)?.let {
             runCatching { json.decodeFromString(Session.serializer(), it) }.getOrNull()
         }
+        val pending = handle.get<String>(KEY_PENDING)?.let {
+            runCatching { json.decodeFromString(PendingGame.serializer(), it) }.getOrNull()
+        }
         val saved = handle.get<String>(KEY_SCREEN)?.let { runCatching { Screen.valueOf(it) }.getOrNull() }
         val screen = when {
             saved == Screen.GAME && session != null -> Screen.GAME
-            saved == Screen.HOME -> Screen.HOME
-            else -> Screen.DOGS // fresh launch: pick your dog first
+            saved == Screen.DOGS && pending != null -> Screen.DOGS
+            else -> Screen.HOME // fresh launch opens on the menu
         }
         return AppUi(
             screen = screen,
             settings = settings,
             game = session?.let { GameUi(it, it.game.players.map { p -> p.cardCount }) },
+            pending = pending.takeIf { screen == Screen.DOGS },
         )
     }
 
@@ -344,6 +415,7 @@ class GameViewModel(app: Application, private val handle: SavedStateHandle) : An
     private companion object {
         const val KEY_SESSION = "session"
         const val KEY_SCREEN = "screen"
+        const val KEY_PENDING = "pending"
         const val AUTO_DELAY_MS = 1100L
         const val AUTO_CONTINUE_MS = 900L
         const val SHUFFLE_SOUNDS = 5

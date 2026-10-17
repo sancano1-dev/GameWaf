@@ -60,7 +60,6 @@ fun HomeScreen(
     onStart: (mode: Mode, players: Int) -> Unit,
     onToggleSound: () -> Unit,
     onOpenParent: () -> Unit,
-    onOpenDogPicker: () -> Unit = {},
     initialPicking: Mode? = null,
 ) {
     val wag = rememberInfiniteTransition(label = "wag")
@@ -74,26 +73,16 @@ fun HomeScreen(
         DogParkBackground()
         val landscape = maxWidth > maxHeight
 
-        // Header: my dog (tap to change it) above a bone-shaped title plate.
+        // Header: the last dog player 1 chose, above a bone-shaped title plate.
         val header: @Composable (Dp) -> Unit = { dogSize ->
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Box(
-                    Modifier
-                        .size(max(dogSize, MinTouch))
-                        .clickable(role = Role.Button, onClick = onOpenDogPicker)
-                        .semantics { contentDescription = strings.chooseDog },
-                ) {
+                Box(Modifier.size(max(dogSize, MinTouch))) {
                     Canvas(Modifier.fillMaxSize()) {
                         val s = size.minDimension
                         drawCircle(fav.card, s * 0.47f)
                         drawCircle(Ink, s * 0.47f, style = Stroke(s * 0.025f))
                         drawOval(Color.Black.copy(alpha = 0.1f), topLeft = Offset(s * 0.22f, s * 0.83f), size = Size(s * 0.56f, s * 0.07f))
                         drawBreed(fav, s / 2, s * 0.87f, s * 0.72f, wag = (t - 0.5f) * 50f, aura = true, phase = t * 6f)
-                        // "change" badge
-                        val bc = Offset(s * 0.84f, s * 0.84f)
-                        drawCircle(Color.White, s * 0.13f, bc)
-                        drawCircle(fav.collar, s * 0.13f, bc, style = Stroke(s * 0.02f))
-                        inset(bc.x - s * 0.08f, bc.y - s * 0.08f, size.width - bc.x - s * 0.08f, size.height - bc.y - s * 0.08f) { iconReplay(fav.collar) }
                     }
                 }
                 Box(Modifier.size(width = 280.dp, height = 70.dp), contentAlignment = Alignment.Center) {
