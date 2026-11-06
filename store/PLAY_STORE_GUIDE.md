@@ -67,12 +67,18 @@ graphics, release notes and bundle in one go.
 ## 5. Release
 1. *Testing → Closed testing* (or Internal testing) → *Create new release*; keep **Play App Signing** on.
 2. Upload `app-release.aab`; release name `1.2 (3)`; release notes from `changelogs/3.txt` per language.
-3. Add testers, roll out, install from the tester link, play a full game on a real phone.
-4. After the test period: *Production → Create release* → promote the same build → countries → submit.
+3. **Testers tab → Create email list** → upload the testers CSV (one Google account e-mail per line).
+   The list, a 14-day tracker and a ready-to-send invitation (EN/ES) are kept **outside this public
+   repository** in `../testers/` (they contain personal e-mail addresses; never commit them).
+4. After review, send testers the opt-in link
+   `https://play.google.com/apps/testing/io.github.sancano1_dev.woofbattle`; they tap *Become a tester*
+   and install. New personal accounts need **12+ testers opted in for 14 days in a row**: invite 15–20.
+5. Then *Dashboard → Apply for production access*, answer the questions about the test, and once
+   approved: *Production → Create release* → promote the same build → countries → submit.
    First reviews of kids' apps can take several days.
 
 ## 6. Hosting the privacy policy
-The repository is private. Either:
+The repository is public with GitHub Pages already on (done). For reference, the options were:
 - make it public and enable **GitHub Pages** (Settings → Pages → *Deploy from a branch* → `main`,
   folder `/docs`). URL: `https://sancano1-dev.github.io/GameWaf/privacy-policy.html`, or
 - upload `docs/privacy-policy.html` to any public site you control.
