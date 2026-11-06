@@ -15,7 +15,7 @@
 | ✅ | Privacy policy web page (4 languages) | `docs/privacy-policy.html` |
 | ✅ | Contact e-mail on the policy and for the listing: `sancano1@gmail.com` | done |
 | ✅ | Privacy policy online: <https://sancano1-dev.github.io/GameWaf/privacy-policy.html> (GitHub Pages, repo public) | done |
-| ✅ | Package name confirmed: `com.woofbattle.app` | done |
+| ✅ | Package name: `io.github.sancano1_dev.woofbattle` (based on your GitHub Pages domain) | done |
 | ⬜ | **You:** keep a second copy of the upload key (`keystore/` + `keystore.properties`, not in git) somewhere safe | |
 | ⬜ | **You:** Play Console developer account, closed test, review | steps 1–5 |
 
@@ -23,8 +23,10 @@ Graphics are rendered from the app's own code: `./gradlew :app:testDebugUnitTest
 fresh copies to `app/build/store/play/` (copy them over the files in `fastlane/.../images/`).
 
 ## 0. Permanent decisions — before the first upload
-- **Package name** `com.woofbattle.app` (`applicationId` in `app/build.gradle.kts`). It can never change
-  after publishing. Change it now if you want your own, e.g. `com.yourname.woofbattle`.
+- **Package name** `io.github.sancano1_dev.woofbattle` (`applicationId` in `app/build.gradle.kts`). It can never change
+  after publishing. It is built from your GitHub Pages domain (`sancano1-dev.github.io`, with the
+  hyphen written as `_`), which makes it unique to you. Earlier test APKs (v1.0–v1.2) used
+  `com.woofbattle.app`; phones see the new one as a different app, so uninstall the old one.
 - **Upload key** `keystore/woofbattle-upload.jks` + `keystore.properties` (password inside). Keep copies
   in a password manager or private cloud drive. With Play App Signing a lost upload key can be reset
   through Play support, but that takes days.

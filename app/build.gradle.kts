@@ -11,7 +11,9 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.woofbattle.app"
+        // Google Play package name (permanent): based on the GitHub Pages domain sancano1-dev.github.io.
+        // The code itself stays in the com.woofbattle.app namespace.
+        applicationId = "io.github.sancano1_dev.woofbattle"
         minSdk = 26
         targetSdk = 37
         versionCode = 3
