@@ -11,8 +11,8 @@ Nobody needs to read or count: the bigger dog wins.
   from any franchise): bold ink outlines, cel shading, spiky flame-like fur, big shiny anime eyes
   with determined brows, grins with a little fang, hatched blush, power auras, speed lines,
   halftone screentone and comic-impact "WOOF!" lettering.
-- Sounds are synthesized at runtime (original, no third-party audio). There are three sound styles to choose from: little pup, big dog and silly cartoon.
-- **Every breed has its own voice**: golden "woof", dalmatian "arf", beagle "a-roo", pug snort, corgi "yip-yip-yip", poodle squeak, husky howl, dachshund "ruff ruff". A dog barks when it is picked, all dogs bark in turn when a game starts, and in a WOOF battle each tied dog barks in its own voice exactly when it shouts in the animation.
+- Game sounds (flips, chimes, fanfares) are synthesized at runtime; dog barks are real CC0 recordings. There are three sound styles to choose from: little pup, big dog and silly cartoon.
+- **Every breed has its own real voice**: short recordings of real dogs (public domain, see *Sound credits*): golden "woof-woof", dalmatian barks, beagle baying, pug, corgi "yip-yip", poodle, husky "woo", dachshund. A dog barks when it is picked, all dogs bark in turn when a game starts, and in a WOOF battle each tied dog barks in its own voice exactly when it shouts in the animation.
 - No INTERNET permission, no ads, no analytics, no purchases, no data collection.
 
 <p>
@@ -202,3 +202,19 @@ label is there for parents). The arrow button or Back returns to the menu.
 See [store/PLAY_STORE_GUIDE.md](store/PLAY_STORE_GUIDE.md): readiness checklist, Play Console answers
 (content rating, families, data safety), store texts and graphics in `fastlane/metadata/android/`,
 and the privacy policy page in `docs/privacy-policy.html`.
+
+## Sound credits
+
+The dog barks are short excerpts (trimmed, cleaned and volume-balanced) of these Freesound.org
+recordings, all released under **CC0 1.0 (public domain)**, so no attribution is required. Thanks anyway!
+
+| Dog in the game | Recording |
+|---|---|
+| Golden | "Golden Retriever "Bud" barks at nighttime fireworks" by russrabon, freesound.org/s/336307 |
+| Dalmatian | "Dog barking.wav" by MichelleGrobler, freesound.org/s/410555 |
+| Beagle | "Beagle Howling.wav" by frontiersoundfx, freesound.org/s/456750 |
+| Pug | "Pug Dog Whining and Barking.wav" by joelcarrsound, freesound.org/s/521829 |
+| Corgi | "Small Dog Barking" by Jofae, freesound.org/s/361544 |
+| Poodle | "one bark of a poodle dog" by fabiopx, freesound.org/s/170015 |
+| Husky | "Alaskan husky sled dogs barking" by SoundsLikeYukon, freesound.org/s/795949 |
+| Dachshund | "Miniature Dachshunds Playing.wav" by Ligidium, freesound.org/s/192235 |

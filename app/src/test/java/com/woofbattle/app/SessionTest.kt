@@ -26,13 +26,13 @@ class SessionTest {
     }
 
     @Test
-    fun `every breed has its own audible bark`() {
-        val barks = com.woofbattle.app.ui.Breed.entries.associateWith { Synth.breedBark(it) }
-        barks.forEach { (breed, pcm) ->
-            assert(pcm.size > Synth.RATE / 10) { "$breed bark too short" }
-            assert(pcm.any { it > 1000 }) { "$breed bark is silent" }
+    fun `every breed has its own recorded bark`() {
+        val files = com.woofbattle.app.ui.Breed.entries.associateWith { java.io.File("src/main/res/raw/bark_${it.name.lowercase()}.ogg") }
+        files.forEach { (breed, f) ->
+            assert(f.isFile && f.length() > 2_000) { "$breed bark missing: $f" }
+            assert(f.readBytes().copyOfRange(0, 4).decodeToString() == "OggS") { "$breed bark is not an OGG file" }
         }
-        assertEquals(barks.size, barks.values.map { it.toList() }.distinct().size, "no two breeds sound the same")
+        assertEquals(files.size, files.values.map { it.readBytes().toList() }.distinct().size, "no two breeds share a recording")
     }
 
     @Test
