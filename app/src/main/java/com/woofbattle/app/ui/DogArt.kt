@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.nativeCanvas
 
 val ValueAccents = listOf(
     Color(0xFFFF8FB1), Color(0xFFFF9F45), Color(0xFFFFCF3D),
@@ -42,9 +43,31 @@ fun DrawScope.drawCardFace(value: Int) {
     drawOval(Ink.copy(alpha = 0.15f), topLeft = Offset(w * 0.5f - dogSize * 0.4f, groundY - dogSize * 0.035f), size = Size(dogSize * 0.8f, dogSize * 0.07f))
     drawBreed(CardBreeds[value - 1], w * 0.5f, groundY, dogSize)
 
+    // Dice in two opposite corners, the card's number in the other two (also upside down, so the
+    // card reads the same from both sides of the table).
     val box = w * 0.2f
+    val numberCenter = Offset(w - w * 0.08f - box / 2, h * 0.055f + box / 2)
     drawPips(value, Offset(w * 0.08f, h * 0.055f), box, accent)
-    rotate(180f) { drawPips(value, Offset(w * 0.08f, h * 0.055f), box, accent) }
+    drawCornerNumber(value, numberCenter, box, accent)
+    rotate(180f) {
+        drawPips(value, Offset(w * 0.08f, h * 0.055f), box, accent)
+        drawCornerNumber(value, numberCenter, box, accent)
+    }
+}
+
+/** The card's value as a bold inked number in a round badge, [box] wide, centred on [c]. */
+private fun DrawScope.drawCornerNumber(value: Int, c: Offset, box: Float, accent: Color) {
+    val r = box / 2
+    drawCircle(Color.White, r, c)
+    drawCircle(accent.copy(alpha = 0.35f), r, c)
+    drawCircle(Ink, r, c, style = Stroke(box * 0.08f))
+    val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+        textSize = box * 0.82f
+        typeface = android.graphics.Typeface.create(android.graphics.Typeface.DEFAULT, android.graphics.Typeface.BOLD)
+        textAlign = android.graphics.Paint.Align.CENTER
+    }
+    val baseline = c.y - (paint.descent() + paint.ascent()) / 2
+    drawContext.canvas.nativeCanvas.drawText(value.toString(), c.x, baseline, paint.apply { color = android.graphics.Color.rgb(0x1E, 0x14, 0x10) })
 }
 
 private val PipLayout = mapOf(
