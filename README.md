@@ -12,6 +12,7 @@ Nobody needs to read or count: the bigger dog wins.
   with determined brows, grins with a little fang, hatched blush, power auras, speed lines,
   halftone screentone and comic-impact "WOOF!" lettering.
 - Sounds are synthesized at runtime (original, no third-party audio). There are three sound styles to choose from: little pup, big dog and silly cartoon.
+- **Every breed has its own voice**: golden "woof", dalmatian "arf", beagle "a-roo", pug snort, corgi "yip-yip-yip", poodle squeak, husky howl, dachshund "ruff ruff". A dog barks when it is picked, all dogs bark in turn when a game starts, and in a WOOF battle each tied dog barks in its own voice exactly when it shouts in the animation.
 - No INTERNET permission, no ads, no analytics, no purchases, no data collection.
 
 <p>

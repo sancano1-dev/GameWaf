@@ -3,6 +3,7 @@ package com.woofbattle.app
 import android.content.Context
 import android.media.AudioAttributes
 import android.media.SoundPool
+import com.woofbattle.app.ui.Breed
 import java.io.File
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -32,12 +33,13 @@ class SoundPlayer(context: Context) {
         )
         .build()
     private val ids = mutableMapOf<Pair<SoundTheme, Sfx>, Int>()
+    private val barkIds = mutableMapOf<Breed, Int>()
 
     @Volatile var enabled = true
     @Volatile var theme = SoundTheme.BIG_DOG
 
     init {
-        val dir = File(context.cacheDir, "sfx-v2").apply { mkdirs() }
+        val dir = File(context.cacheDir, "sfx-v3").apply { mkdirs() }
         SoundTheme.entries.forEach { theme ->
             Sfx.entries.forEach { sfx ->
                 val file = File(dir, "${theme.name.lowercase()}_${sfx.name.lowercase()}.wav")
@@ -45,6 +47,17 @@ class SoundPlayer(context: Context) {
                 ids[theme to sfx] = pool.load(file.path, 1)
             }
         }
+        Breed.entries.forEach { breed ->
+            val file = File(dir, "dog_${breed.name.lowercase()}.wav")
+            if (!file.exists()) file.writeBytes(wav(Synth.breedBark(breed)))
+            barkIds[breed] = pool.load(file.path, 1)
+        }
+    }
+
+    /** The dog's own voice: every breed barks differently. */
+    fun playBark(breed: Breed, force: Boolean = false) {
+        if (!enabled && !force) return
+        barkIds[breed]?.let { pool.play(it, 1f, 1f, 2, 0, 1f) }
     }
 
     fun play(sfx: Sfx, force: Boolean = false) {
@@ -122,6 +135,28 @@ internal object Synth {
 
     // ---------- Building blocks ----------
 
+    /** Each breed's own bark, from a tiny pug snort to a husky howl. */
+    fun breedBark(breed: Breed): ShortArray = toPcm(
+        when (breed) {
+            // warm, friendly "woof"
+            Breed.GOLDEN -> concat(bark(0.24, 430.0, noise = 0.35), silence(0.08), bark(0.2, 400.0, noise = 0.35))
+            // sharp, clear "arf!"
+            Breed.DALMATIAN -> concat(bark(0.15, 700.0, noise = 0.25), silence(0.06), bark(0.15, 680.0, noise = 0.25))
+            // baying hound "a-roo-oo"
+            Breed.BEAGLE -> howl(0.55, from = 520.0, peak = 700.0, to = 470.0, vibrato = 0.05)
+            // snorty little "hrrff"
+            Breed.PUG -> concat(snort(0.1), bark(0.13, 380.0, noise = 0.65))
+            // yappy "yip-yip-yip"
+            Breed.CORGI -> concat(bark(0.08, 950.0, noise = 0.2), silence(0.05), bark(0.08, 1000.0, noise = 0.2), silence(0.05), bark(0.1, 920.0, noise = 0.2))
+            // high squeaky "yip!"
+            Breed.POODLE -> concat(bark(0.1, 1300.0, noise = 0.12), silence(0.07), bark(0.12, 1250.0, noise = 0.12))
+            // long wolf-like "awoooo"
+            Breed.HUSKY -> howl(0.75, from = 360.0, peak = 560.0, to = 430.0, vibrato = 0.035)
+            // low little "ruff ruff"
+            Breed.DACHSHUND -> concat(bark(0.14, 320.0, noise = 0.55), silence(0.07), bark(0.14, 295.0, noise = 0.55))
+        },
+    )
+
     private fun samples(sec: Double) = DoubleArray((sec * RATE).toInt())
 
     private fun silence(sec: Double) = samples(sec)
@@ -165,6 +200,33 @@ internal object Synth {
             lp += 0.35 * ((rng.nextDouble() * 2 - 1) - lp)
             val env = min(1.0, p * 25) * exp(-4.5 * p)
             out[i] = env * (0.55 * buzz + noise * lp)
+        }
+        return out
+    }
+
+    /** Howl: pitch rises to [peak] then falls to [to], with vibrato and soft harmonics. */
+    private fun howl(sec: Double, from: Double, peak: Double, to: Double, vibrato: Double): DoubleArray {
+        val out = samples(sec)
+        var phase = 0.0
+        for (i in out.indices) {
+            val p = i.toDouble() / out.size
+            val t = i.toDouble() / RATE
+            val base = if (p < 0.4) from + (peak - from) * (p / 0.4) else peak + (to - peak) * ((p - 0.4) / 0.6)
+            phase += 2 * PI * base * (1 + vibrato * sin(2 * PI * 6 * t)) / RATE
+            val env = min(1.0, p * 8) * min(1.0, (1 - p) * 5)
+            out[i] = env * (sin(phase) + 0.35 * sin(2 * phase) + 0.12 * sin(3 * phase))
+        }
+        return out
+    }
+
+    /** Snort: a short burst of low, breathy noise. */
+    private fun snort(sec: Double): DoubleArray {
+        val out = samples(sec)
+        var lp = 0.0
+        for (i in out.indices) {
+            val p = i.toDouble() / out.size
+            lp += 0.08 * ((rng.nextDouble() * 2 - 1) - lp)
+            out[i] = lp * 6 * sin(PI * p)
         }
         return out
     }

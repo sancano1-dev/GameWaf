@@ -49,6 +49,16 @@ private fun rememberSceneTime(): Float {
     return time
 }
 
+/** Seconds after a tie starts when the first dog barks, and the gap between dogs' barks. */
+const val BARK_START_S = 0.12f
+const val BARK_STEP_S = 0.36f
+
+/** Moments (seconds after the tie starts) when tied dog [index] of [count] barks, up to [until]. */
+fun barkTimes(index: Int, count: Int, until: Float): List<Float> {
+    val period = count * BARK_STEP_S
+    return generateSequence(BARK_START_S + index * BARK_STEP_S) { it + period }.takeWhile { it < until }.toList()
+}
+
 /**
  * Tie scene: the tied dogs lunge at each other and take turns shouting "WOOF!" in jagged manga
  * speech balloons, with anger marks, shaking and speed lines.
@@ -76,8 +86,10 @@ fun BarkOff(visible: Boolean, dogs: List<Breed>, text: String, modifier: Modifie
             val poses = dogs.indices.map { i ->
                 val cx = w * (i + 0.5f) / n
                 val dir = sign(w / 2 - cx) // lean toward the middle
-                // dogs take turns: each bark peaks at a different moment
-                val bark = ((sin(2 * PI * 2.0 * time + i * 2 * PI / n) + 1) / 2).toFloat().pow(2)
+                // dogs take turns; each bark peaks exactly when that dog's own bark sound plays
+                val period = n * BARK_STEP_S
+                val phase = (time - BARK_START_S - i * BARK_STEP_S) / period
+                val bark = ((cos(2 * PI * phase) + 1) / 2).toFloat().pow(4)
                 val jitter = sin(time * 70f + i * 3f) * s * 0.012f * bark
                 Pose(cx, dir, bark, dir * bark * s * 0.12f + jitter, bark * s * 0.05f)
             }

@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.woofbattle.app.ui.Breed
+import com.woofbattle.app.ui.barkTimes
 import com.woofbattle.engine.Card
 import com.woofbattle.engine.GameEngine
 import com.woofbattle.engine.GameState
@@ -93,6 +94,7 @@ class GameViewModel(app: Application, private val handle: SavedStateHandle) : An
     @Volatile private var sounds: SoundPlayer? = null
     private var roundJob: Job? = null
     private var autoJob: Job? = null
+    private var barkJob: Job? = null
     /** Completed by [onContinueTap] while a finished round waits on the table. */
     private var continueSignal: CompletableDeferred<Unit>? = null
 
@@ -149,7 +151,7 @@ class GameViewModel(app: Application, private val handle: SavedStateHandle) : An
             ?: picks.indices.firstOrNull { picks[it] == null }
             ?: p.active
         updatePending(p.copy(picks = picks, active = nextActive))
-        play(Sfx.BARK)
+        playBark(dog)
     }
 
     /** Green play button: everyone has a dog, start the game. */
@@ -205,9 +207,37 @@ class GameViewModel(app: Application, private val handle: SavedStateHandle) : An
             }
             _ui.update { app -> app.copy(game = app.game?.copy(dealing = false, pileCounts = game.players.map { p -> p.cardCount })) }
             play(Sfx.PLACE)
+            rollCall(session.dogs)
             scheduleAutoFlip()
         }
     }
+
+    /** Entering the battle: each player's dog barks once, in seat order, in its own voice. */
+    private fun rollCall(dogs: List<Breed>) {
+        barkJob?.cancel()
+        barkJob = viewModelScope.launch {
+            dogs.forEach { dog ->
+                delay(ROLL_CALL_GAP_MS)
+                playBark(dog)
+            }
+        }
+    }
+
+    /** Woof battle: the tied dogs bark in turn, each with its own voice, in time with the animation. */
+    private fun barkOff(dogs: List<Breed>) {
+        barkJob?.cancel()
+        barkJob = viewModelScope.launch {
+            dogs.flatMapIndexed { i, dog -> barkTimes(i, dogs.size, BARK_OFF_SECONDS).map { it to dog } }
+                .sortedBy { it.first }
+                .fold(0f) { elapsed, (at, dog) ->
+                    delay(((at - elapsed) * 1000).toLong())
+                    playBark(dog)
+                    at
+                }
+        }
+    }
+
+    private fun playBark(dog: Breed) = sounds?.playBark(dog)
 
 /** Human seats get their chosen dogs (or the favourite); the others get different random breeds. */
     private fun dogsFor(players: Int, chosen: List<Breed>): List<Breed> {
@@ -321,7 +351,7 @@ class GameViewModel(app: Application, private val handle: SavedStateHandle) : An
                         delay(900)
                     }
                     is RoundEvent.WoofBattle -> {
-                        play(Sfx.BARK)
+                        barkOff(event.players.sorted().map { g.dogOf(it) })
                         set { copy(woof = true, shakeTick = shakeTick + 1, battlers = event.players.toSet()) }
                         delay(1600)
                         set { copy(woof = false) }
@@ -404,6 +434,7 @@ class GameViewModel(app: Application, private val handle: SavedStateHandle) : An
 
     private fun cancelJobs() {
         continueSignal = null
+        barkJob?.cancel()
         roundJob?.cancel()
         autoJob?.cancel()
     }
@@ -419,6 +450,8 @@ class GameViewModel(app: Application, private val handle: SavedStateHandle) : An
         const val AUTO_DELAY_MS = 1100L
         const val AUTO_CONTINUE_MS = 900L
         const val SHUFFLE_SOUNDS = 5
+        const val ROLL_CALL_GAP_MS = 450L
+        const val BARK_OFF_SECONDS = 1.5f
         const val SHUFFLE_STEP_MS = 360L
         val json = Json { ignoreUnknownKeys = true }
     }

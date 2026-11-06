@@ -26,6 +26,26 @@ class SessionTest {
     }
 
     @Test
+    fun `every breed has its own audible bark`() {
+        val barks = com.woofbattle.app.ui.Breed.entries.associateWith { Synth.breedBark(it) }
+        barks.forEach { (breed, pcm) ->
+            assert(pcm.size > Synth.RATE / 10) { "$breed bark too short" }
+            assert(pcm.any { it > 1000 }) { "$breed bark is silent" }
+        }
+        assertEquals(barks.size, barks.values.map { it.toList() }.distinct().size, "no two breeds sound the same")
+    }
+
+    @Test
+    fun `tied dogs bark in turn, in time with the bark-off animation`() {
+        val two = (0..1).map { com.woofbattle.app.ui.barkTimes(it, 2, 1.5f) }
+        assertEquals(listOf(0.12f, 0.84f), two[0].map { (it * 100).toInt() / 100f })
+        assertEquals(listOf(0.48f, 1.2f), two[1].map { (it * 100).toInt() / 100f })
+        val four = (0..3).map { com.woofbattle.app.ui.barkTimes(it, 4, 1.5f) }
+        assertEquals(listOf(1, 1, 1, 1), four.map { it.size }, "with 4 dogs each barks once")
+        assertEquals(four.flatten().sorted(), four.flatten(), "dogs take turns in seat order")
+    }
+
+    @Test
     fun `every sound theme synthesizes every sound`() {
         SoundTheme.entries.forEach { theme ->
             Sfx.entries.forEach { sfx ->

@@ -220,3 +220,21 @@ class ScreenshotTestStoreAssets {
     }
 
 }
+
+/** Writes every breed's bark as a WAV (build/store/barks) to listen to them. Opt-in like the screenshots. */
+class ScreenshotTestBarkPreview {
+    @Test
+    fun write_breed_barks() {
+        val root = File(System.getProperty("screenshotDir") ?: "build/screenshots").absoluteFile.parentFile ?: File(".")
+        val dir = File(root, "store/barks").apply { mkdirs() }
+        Breed.entries.forEachIndexed { i, breed ->
+            val pcm = Synth.breedBark(breed)
+            val data = java.nio.ByteBuffer.allocate(44 + pcm.size * 2).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+            data.put("RIFF".toByteArray()).putInt(36 + pcm.size * 2).put("WAVE".toByteArray())
+            data.put("fmt ".toByteArray()).putInt(16).putShort(1).putShort(1).putInt(Synth.RATE).putInt(Synth.RATE * 2).putShort(2).putShort(16)
+            data.put("data".toByteArray()).putInt(pcm.size * 2)
+            pcm.forEach { data.putShort(it) }
+            File(dir, "%d_%s.wav".format(i + 1, breed.name.lowercase())).writeBytes(data.array())
+        }
+    }
+}
