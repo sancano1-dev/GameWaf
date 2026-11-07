@@ -15,7 +15,7 @@ Cada jugador toca su huella y todos dan la vuelta a una carta a la vez. La carta
 • Modo demostración para ver cómo se juega
 
 🐕 ELIGE TU PERRO
-8 perros estilo manga, cada uno de su color: Golden, Dálmata, Beagle, Carlino, Corgi, Caniche, Husky y Salchicha. Cada jugador elige uno distinto.
+8 perros estilo manga, cada uno de su color: Golden, Dálmata, Beagle, Carlino, Corgi, Caniche, Husky y Salchicha. Cada jugador elige uno distinto, y cada perro ladra con su propia voz real.
 
 ✨ ESTILO ANIME
 Trazos de tinta, ojos grandes y brillantes, líneas de velocidad, auras de energía, un duelo de ladridos en cada empate y un perro que salta de alegría al ganar.

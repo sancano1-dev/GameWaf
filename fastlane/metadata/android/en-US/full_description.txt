@@ -15,7 +15,7 @@ Everyone taps their paw and flips a card at the same time. The card with the big
 • Demo mode to show how the game works
 
 🐕 CHOOSE YOUR DOG
-8 manga-style dogs, each in its own colour: Golden, Dalmatian, Beagle, Pug, Corgi, Poodle, Husky and Dachshund. Each player picks a different one.
+8 manga-style dogs, each in its own colour: Golden, Dalmatian, Beagle, Pug, Corgi, Poodle, Husky and Dachshund. Each player picks a different one, and every dog barks with its own real voice.
 
 ✨ ANIME STYLE
 Bold ink lines, big shiny eyes, speed lines, power auras, a bark-off on every tie and a happy jumping dog for the winner.
